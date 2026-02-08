@@ -18,7 +18,7 @@ html {
     border-radius: 20px;
     transition: transform 0.2s, box-shadow 0.2s;
 }
-.organic-btn:hover {
+.organic-btn:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 10px 15px -3px rgba(74, 93, 35, 0.3);
 }
@@ -29,6 +29,7 @@ button:disabled {
     transform: none !important;
     box-shadow: none !important;
     cursor: not-allowed;
+    opacity: 0.6;
 }
 
 /* Card Styling for Sections */
@@ -38,6 +39,11 @@ button:disabled {
     border-radius: 24px;
     padding: 2rem;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 10px 15px -3px rgba(74, 93, 35, 0.1);
 }
 
 /* Custom Input Styling */
@@ -48,12 +54,18 @@ button:disabled {
     border: 2px solid #E5E7EB;
     background-color: #F9FAFB;
     transition: all 0.3s;
+    font-size: 14px;
 }
 .organic-input:focus {
     border-color: #4A5D23;
     background-color: #fff;
     outline: none;
     box-shadow: 0 0 0 3px rgba(74, 93, 35, 0.1);
+}
+
+.organic-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* Giant Image Button Pulse Animation */
@@ -64,4 +76,171 @@ button:disabled {
 }
 .pulse-btn {
     animation: pulse-green 2s infinite;
+}
+
+/* Image preview overlay styling */
+#imagePreview {
+    transition: opacity 0.3s ease;
+}
+
+#imagePreview.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Smooth transitions for sections */
+#manualLocationInputs,
+#summarySection,
+#loadingSpinner {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Input group styling */
+.input-group {
+    transition: all 0.2s ease;
+}
+
+/* Hover effects for interactive elements */
+.hover\:scale-105:hover {
+    transform: scale(1.05);
+}
+
+/* Status text colors */
+.text-green-600 {
+    color: #059669;
+}
+
+.text-orange-600 {
+    color: #ea580c;
+}
+
+/* Ensure proper spacing for nested elements */
+.space-y-4 > * + * {
+    margin-top: 1rem;
+}
+
+/* Select dropdown arrow styling */
+select.organic-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%234A5D23' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+/* Improve readability of lists in summary */
+#summaryText ul {
+    padding-left: 1.5rem;
+}
+
+#summaryText li {
+    margin: 0.5rem 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card {
+        padding: 1.5rem;
+    }
+    
+    .organic-bubble {
+        padding: 2rem 1.5rem !important;
+    }
+    
+    h1 {
+        font-size: 2rem !important;
+    }
+}
+
+/* Print styles for PDF */
+@media print {
+    body {
+        background: white;
+    }
+    
+    nav, footer, button {
+        display: none !important;
+    }
+    
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        page-break-inside: avoid;
+    }
+}
+
+/* Fade-in animation for sections */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card,
+#summarySection,
+#loadingSpinner {
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* Success checkmark animation */
+@keyframes checkmark {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+#imagePreview .fa-check-circle {
+    animation: checkmark 0.5s ease-out;
+}
+
+/* Nutrient box styling in summary */
+.bg-blue-50 { background-color: #eff6ff; }
+.bg-orange-50 { background-color: #fff7ed; }
+.bg-purple-50 { background-color: #faf5ff; }
+.bg-green-50 { background-color: #f0fdf4; }
+
+.text-blue-600 { color: #2563eb; }
+.text-orange-600 { color: #ea580c; }
+.text-purple-600 { color: #9333ea; }
+
+/* Ensure icons are properly aligned */
+.fa {
+    vertical-align: middle;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #4A5D23;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #5C742C;
 }

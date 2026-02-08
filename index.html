@@ -64,12 +64,22 @@
 
         <!-- STEP 1: IMAGE UPLOAD -->
         <section class="w-full flex flex-col items-center gap-4">
-            <button id="imageBtn"
-                class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-cow-dung-light text-white text-4xl shadow-2xl flex items-center justify-center hover:bg-cow-dung-green hover:scale-105 transition-all duration-300 pulse-btn border-4 border-ivory-cream ring-4 ring-cow-dung-green/20">
-                <i class="fas fa-camera"></i>
-            </button>
+            <div class="relative">
+                <button id="imageBtn"
+                    class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-cow-dung-light text-white text-4xl shadow-2xl flex items-center justify-center hover:bg-cow-dung-green hover:scale-105 transition-all duration-300 pulse-btn border-4 border-ivory-cream ring-4 ring-cow-dung-green/20">
+                    <i class="fas fa-camera"></i>
+                </button>
+                
+                <!-- Image preview overlay -->
+                <div id="imagePreview" class="hidden absolute inset-0 w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-ivory-cream ring-4 ring-green-500/50">
+                    <img id="previewImg" src="" alt="Preview" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <i class="fas fa-check-circle text-white text-4xl"></i>
+                    </div>
+                </div>
+            </div>
 
-            <!-- ✅ ADDED: hidden file input for JS -->
+            <!-- Hidden file input -->
             <input
                 type="file"
                 id="imageInput"
@@ -78,63 +88,76 @@
             />
 
             <p class="text-cow-dung-green font-bold text-lg">
-                1. Upload Soil Photo
+                <span id="imageStatusText">1. Upload Soil Photo</span>
             </p>
+            
+            <!-- Image name display -->
+            <p id="imageFileName" class="text-sm text-gray-600 hidden"></p>
         </section>
 
         <!-- STEP 2: LOCATION -->
-        <!-- ✅ ADDED: hidden class so it appears ONLY if GPS denied -->
-        <section id="manualSection" class="card w-full transition-all duration-300 hidden">
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-cow-dung-green/10 rounded-full flex items-center justify-center text-cow-dung-green">
-                        <i class="fas fa-map-marker-alt"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-bold text-cow-dung-green">
-                            2. Location Details
-                        </h3>
-                        <p id="locationStatus"
-                           class="text-xs text-gray-500 font-semibold">
-                            Detecting GPS...
-                        </p>
-                    </div>
-                </div>
+       <!-- STEP 2: LOCATION -->
+<section id="locationSection" class="card w-full transition-all duration-300">
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-cow-dung-green/10 rounded-full flex items-center justify-center text-cow-dung-green">
+                <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold text-cow-dung-green">
+                    2. Location Details
+                </h3>
+                <p id="locationStatus"
+                   class="text-xs text-gray-500 font-semibold">
+                    Detecting GPS...
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual location input (hidden by default, shown if GPS fails) -->
+    <div id="manualLocationInputs" class="hidden">
+        <div class="grid md:grid-cols-2 gap-6 mb-2">
+            <div class="input-group">
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">
+                    State
+                </label>
+                <select id="stateSelect" class="organic-input">
+                    <option value="">Select State</option>
+                    <!-- States will be loaded dynamically from JSON -->
+                </select>
             </div>
 
-            <div class="grid md:grid-cols-2 gap-6 mb-2">
-                <div class="input-group">
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">
-                        State
-                    </label>
-                    <select id="stateSelect" class="organic-input">
-                        <!-- ✅ FIXED: placeholder not disabled -->
-                        <option value="">Select State</option>
-                    </select>
-                </div>
-
-                <div class="input-group">
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">
-                        District
-                    </label>
-                    <select id="districtSelect" class="organic-input">
-                        <!-- ✅ FIXED: placeholder not disabled -->
-                        <option value="">Select District</option>
-                    </select>
-                </div>
+            <div class="input-group">
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">
+                    District
+                </label>
+                <select id="districtSelect" class="organic-input">
+                    <option value="">Select District First</option>
+                    <!-- Districts will be loaded based on selected state -->
+                </select>
             </div>
+        </div>
 
-            <button id="confirmLocation"
-                class="organic-btn bg-cow-dung-green text-white w-full py-3 font-bold mt-4">
-                Confirm Location
-            </button>
-        </section>
+        <button id="confirmLocation"
+            class="organic-btn bg-cow-dung-green text-white w-full py-3 font-bold mt-4 hover:bg-cow-dung-light">
+            Confirm Location
+        </button>
+    </div>
+</section>
 
         <!-- STEP 3: ANALYSE -->
         <button id="analyseBtn" disabled
             class="w-full max-w-md organic-btn bg-gray-300 text-gray-500 py-4 text-xl font-bold flex items-center justify-center gap-3 cursor-not-allowed transition-all duration-300 shadow-sm">
-            <i class="fas fa-brain"></i> Analyse Soil Health
+            <i class="fas fa-brain"></i> 
+            <span id="analyseBtnText">Analyse Soil Health</span>
         </button>
+
+        <!-- LOADING SPINNER -->
+        <div id="loadingSpinner" class="hidden flex flex-col items-center gap-4">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-cow-dung-green"></div>
+            <p class="text-cow-dung-green font-semibold">Analyzing soil and climate data...</p>
+        </div>
 
         <!-- SUMMARY SECTION -->
         <section id="summarySection" class="card w-full hidden">
@@ -148,15 +171,14 @@
             </div>
 
             <div class="bg-ivory-cream p-4 rounded-xl border border-cow-dung-green/10 mb-6">
-                <p id="summaryText"
-                   class="text-gray-600 leading-relaxed whitespace-pre-line">
+                <div id="summaryText" class="text-gray-600 leading-relaxed whitespace-pre-line">
                     Report details...
-                </p>
+                </div>
             </div>
 
             <button id="downloadBtn"
                 class="organic-btn border-2 border-cow-dung-green text-cow-dung-green w-full py-3 font-bold hover:bg-cow-dung-green hover:text-white flex justify-center items-center gap-2">
-                <i class="fas fa-download"></i> Download Report
+                <i class="fas fa-download"></i> Download Report as PDF
             </button>
         </section>
 
@@ -164,19 +186,12 @@
 
     <footer class="bg-cow-dung-green text-ivory-cream py-6 text-center mt-auto">
         <p class="text-sm opacity-70">
-            &copy; 2025 AgriMind AI
+            &copy; 2025 Growmore
         </p>
     </footer>
 
     <!-- JavaScript -->
     <script src="script.js"></script>
-
-    <!-- ✅ ADDED: button → file input wiring -->
-    <script>
-        document.getElementById("imageBtn").onclick = () => {
-            document.getElementById("imageInput").click();
-        };
-    </script>
 
 </body>
 </html>
