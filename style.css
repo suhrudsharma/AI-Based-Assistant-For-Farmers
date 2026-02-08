@@ -1,56 +1,67 @@
-body {
-    font-family: Arial, sans-serif;
-    padding: 30px;
-    background: #f7f9fb;
+html { 
+    scroll-behavior: smooth; 
 }
 
-.top-bar {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 30px;
+/* The Amoeba Bubble Shape */
+.organic-bubble {
+    border-radius: 64% 36% 29% 71% / 62% 41% 59% 38%;
+    box-shadow: 15px 20px 30px -5px rgba(74, 93, 35, 0.4);
+    transition: all 1s ease-in-out;
+}
+.organic-bubble:hover {
+    border-radius: 45% 55% 68% 32% / 48% 62% 38% 52%;
+    transform: scale(1.01);
 }
 
-button {
-    padding: 10px 16px;
-    cursor: pointer;
+/* Button Styling */
+.organic-btn {
+    border-radius: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.organic-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(74, 93, 35, 0.3);
 }
 
+/* ✅ SAFETY: Disabled buttons should NOT animate */
+.organic-btn:disabled,
 button:disabled {
-    opacity: 0.5;
+    transform: none !important;
+    box-shadow: none !important;
     cursor: not-allowed;
 }
 
-.primary {
-    background: #2563eb;
-    color: white;
-    border: none;
-}
-
+/* Card Styling for Sections */
 .card {
     background: white;
-    padding: 20px;
-    border-radius: 8px;
-    margin-top: 30px;
-    max-width: 400px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border: 1px solid rgba(74, 93, 35, 0.1);
+    border-radius: 24px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
-.input-group {
-    margin-bottom: 15px;
-}
-
-.input-group input {
+/* Custom Input Styling */
+.organic-input {
     width: 100%;
-    padding: 8px;
-    border-bottom: none;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 2px solid #E5E7EB;
+    background-color: #F9FAFB;
+    transition: all 0.3s;
+}
+.organic-input:focus {
+    border-color: #4A5D23;
+    background-color: #fff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(74, 93, 35, 0.1);
 }
 
-.input-group select {
-    width: 100%;
-    padding: 8px;
+/* Giant Image Button Pulse Animation */
+@keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(74, 93, 35, 0.4); }
+    70% { box-shadow: 0 0 0 20px rgba(74, 93, 35, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(74, 93, 35, 0); }
 }
-
-.hidden {
-    display: none;
+.pulse-btn {
+    animation: pulse-green 2s infinite;
 }

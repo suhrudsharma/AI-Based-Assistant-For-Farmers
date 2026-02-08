@@ -1,28 +1,31 @@
+// ================== DOM ELEMENTS ==================
 const locationStatus = document.getElementById("locationStatus");
 const manualSection = document.getElementById("manualSection");
 const analyseBtn = document.getElementById("analyseBtn");
 
-const stateSearch = document.getElementById("stateSearch");
-const districtSearch = document.getElementById("districtSearch");
 const stateSelect = document.getElementById("stateSelect");
 const districtSelect = document.getElementById("districtSelect");
 const confirmBtn = document.getElementById("confirmLocation");
+
+const imageInput = document.getElementById("imageInput");
 
 const summarySection = document.getElementById("summarySection");
 const summaryText = document.getElementById("summaryText");
 const downloadBtn = document.getElementById("downloadBtn");
 
-let indiaData = {};
-let currentState = "";
-let finalLocation = "";
-
-/* -------- ON LOAD: ASK LOCATION IMMEDIATELY -------- */
-window.onload = () => {
-    loadIndiaData();
-    requestLocation();
+// ================== GLOBAL STATE ==================
+let appState = {
+    location: null,
+    image: null,
+    result: null
 };
 
-/* -------- LOCATION -------- */
+// ================== ON LOAD ==================
+window.addEventListener("load", () => {
+    requestLocation();
+});
+
+// ================== LOCATION ==================
 function requestLocation() {
     if (!navigator.geolocation) {
         showManual("Geolocation not supported");
@@ -31,9 +34,11 @@ function requestLocation() {
 
     navigator.geolocation.getCurrentPosition(
         pos => {
+            appState.location = {
+                lat: pos.coords.latitude,
+                lon: pos.coords.longitude
+            };
             locationStatus.textContent = "📍 Location detected automatically";
-            finalLocation = `Lat ${pos.coords.latitude.toFixed(2)}, Lon ${pos.coords.longitude.toFixed(2)}`;
-            analyseBtn.disabled = false;
         },
         () => {
             showManual("📍 Location permission denied");
@@ -41,97 +46,104 @@ function requestLocation() {
     );
 }
 
-function showManual(message) {
-    locationStatus.textContent = message;
+function showManual(msg) {
+    locationStatus.textContent = msg;
     manualSection.classList.remove("hidden");
     manualSection.scrollIntoView({ behavior: "smooth" });
 }
 
-/* -------- LOAD DATA -------- */
-async function loadIndiaData() {
-    const res = await fetch("data/india_states_districts.json");
-    indiaData = await res.json();
-    populateStates(Object.keys(indiaData));
-}
-
-/* -------- STATE SEARCH -------- */
-stateSearch.addEventListener("input", () => {
-    const val = stateSearch.value.toLowerCase();
-    const filtered = Object.keys(indiaData).filter(s =>
-        s.toLowerCase().includes(val)
-    );
-    populateStates(filtered);
-});
-
-/* -------- DISTRICT SEARCH -------- */
-districtSearch.addEventListener("input", () => {
-    if (!currentState) return;
-    const val = districtSearch.value.toLowerCase();
-    const filtered = indiaData[currentState].filter(d =>
-        d.toLowerCase().includes(val)
-    );
-    populateDistricts(filtered);
-});
-
-/* -------- DROPDOWNS -------- */
-function populateStates(states) {
-    stateSelect.innerHTML = "";
-    states.forEach(s => {
-        const opt = document.createElement("option");
-        opt.value = s;
-        opt.textContent = s;
-        stateSelect.appendChild(opt);
-    });
-}
-
-stateSelect.addEventListener("change", () => {
-    currentState = stateSelect.value;
-    populateDistricts(indiaData[currentState]);
-});
-
-function populateDistricts(districts) {
-    districtSelect.innerHTML = "";
-    districts.forEach(d => {
-        const opt = document.createElement("option");
-        opt.value = d;
-        opt.textContent = d;
-        districtSelect.appendChild(opt);
-    });
-}
-
-/* -------- CONFIRM MANUAL LOCATION -------- */
 confirmBtn.addEventListener("click", () => {
     if (!stateSelect.value || !districtSelect.value) {
         alert("Select state and district");
         return;
     }
 
-    finalLocation = `${districtSelect.value}, ${stateSelect.value}`;
+    appState.location = {
+        state: stateSelect.value,
+        district: districtSelect.value
+    };
+
     locationStatus.textContent = "📍 Location set manually";
+});
+
+// ================== IMAGE ==================
+imageInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    appState.image = file;
     analyseBtn.disabled = false;
 });
 
-/* -------- ANALYSE -------- */
-analyseBtn.addEventListener("click", () => {
-    summaryText.textContent =
-        `Location: ${finalLocation}\nSeason: ${detectSeason()}`;
+// ================== ANALYSE ==================
+analyseBtn.addEventListener("click", async () => {
+    if (!appState.location || !appState.image) {
+        alert("Location and image required");
+        return;
+    }
+
+    summaryText.textContent = "Analysing soil and climate...";
     summarySection.classList.remove("hidden");
-    summarySection.scrollIntoView({ behavior: "smooth" });
+
+    const formData = new FormData();
+    formData.append("image", appState.image);
+    formData.append("location", JSON.stringify(appState.location));
+
+    try {
+        const res = await fetch(
+            "https://nirmalll17-devsoc.hf.space/predict",
+            {
+                method: "POST",
+                body: formData
+            }
+        );
+
+        const data = await res.json();
+
+        if (data.status !== "success") {
+            summaryText.textContent = "Analysis failed";
+            return;
+        }
+
+        appState.result = data.summary;
+        renderSummary(data.summary);
+
+    } catch (err) {
+        console.error(err);
+        summaryText.textContent = "Server error";
+    }
 });
 
-/* -------- DOWNLOAD SUMMARY -------- */
+// ================== RENDER SUMMARY ==================
+function renderSummary(summary) {
+    summaryText.innerHTML = `
+<b>Soil Type:</b> ${summary.soil_type}<br>
+<b>Weather:</b> ${summary.weather}<br>
+<b>Rainfall:</b> ${summary.rainfall_est}<br><br>
+
+<b>Recommended Crop:</b> ${summary.recommended_crop}<br>
+<b>Top 3 Crops:</b>
+<ul>
+${summary.top_3_crops.map(c => `<li>${c}</li>`).join("")}
+</ul>
+
+<b>Nutrient Profile:</b><br>
+N: ${summary.nutrient_profile.N}<br>
+P: ${summary.nutrient_profile.P}<br>
+K: ${summary.nutrient_profile.K}<br>
+pH: ${summary.nutrient_profile.ph}
+    `;
+}
+
+// ================== DOWNLOAD ==================
 downloadBtn.addEventListener("click", () => {
-    const blob = new Blob([summaryText.textContent], { type: "text/plain" });
+    if (!appState.result) return;
+
+    const text = JSON.stringify(appState.result, null, 2);
+    const blob = new Blob([text], { type: "application/json" });
+
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "farmer_summary.txt";
+    a.download = "farmer_summary.json";
     a.click();
 });
-
-/* -------- SEASON -------- */
-function detectSeason() {
-    const m = new Date().getMonth() + 1;
-    if (m >= 6 && m <= 10) return "Kharif";
-    if (m >= 10 || m <= 2) return "Rabi";
-    return "Zaid";
-}

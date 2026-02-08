@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Basic Farm App</title>
+</head>
+<body>
+
+    <h2>Farm Analyzer</h2>
+
+    <button onclick="getLocation()">Get Location</button>
+    <p id="location-status">Location not set</p>
+    <br>
+
+    <input type="file" id="photo-input">
+    <br><br>
+
+    <button onclick="analyzeFarm()">Analyze</button>
+    <p id="status-text"></p>
+
+    <hr>
+
+    <h3>Results:</h3>
+    <p><b>Recommended Crop:</b> <span id="crop">--</span></p>
+    <p><b>Soil Type:</b> <span id="soil">--</span></p>
+    <p><b>Weather:</b> <span id="weather">--</span></p>
+    <p><b>Rainfall:</b> <span id="rain">--</span></p>
+    <p><b>Nutrients:</b> <span id="npk">--</span></p>
+    <p><b>Alternatives:</b> <span id="alts">--</span></p>
+
+    <script>
+        let lat = null;
+        let lon = null;
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        lat = pos.coords.latitude;
+                        lon = pos.coords.longitude;
+                        document.getElementById('location-status').innerText = "Location: " + lat + ", " + lon;
+                    },
+                    (err) => alert("Error getting location.")
+                );
+            } else {
+                alert("Geolocation not supported.");
+            }
+        }
+
+        async function analyzeFarm() {
+            const fileInput = document.getElementById('photo-input');
+            const status = document.getElementById('status-text');
+
+            if (!lat || !lon) {
+                alert("Get location first.");
+                return;
+            }
+            if (fileInput.files.length === 0) {
+                alert("Upload a photo.");
+                return;
+            }
+
+            status.innerText = "Processing...";
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('lat', lat);
+            formData.append('lon', lon);
+
+            try {
+                // YOUR API URL
+                const response = await fetch('https://nirmalll17-devsoc.hf.space/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                const s = data.summary;
+
+                // Fill Data
+                document.getElementById('crop').innerText = s.recommended_crop;
+                document.getElementById('soil').innerText = s.soil_type;
+                document.getElementById('weather').innerText = s.weather;
+                document.getElementById('rain').innerText = s.rainfall_est;
+                document.getElementById('alts').innerText = s.top_3_crops.join(", ");
+                
+                const n = s.nutrient_profile;
+                document.getElementById('npk').innerText = `N:${n.N} P:${n.P} K:${n.K} pH:${n.ph}`;
+                
+                status.innerText = "Done.";
+
+            } catch (error) {
+                console.error(error);
+                status.innerText = "Error connecting to server.";
+            }
+        }
+    </script>
+
+</body>
+</html>
