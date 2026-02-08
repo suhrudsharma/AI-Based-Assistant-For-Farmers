@@ -1,32 +1,29 @@
-const autoBtn = document.getElementById("autoLocate");
-const manualBtn = document.getElementById("manualBtn");
-const drawer = document.getElementById("manualDrawer");
-const statusText = document.getElementById("status");
-const manualDiv = document.getElementById("manual");
-const locationSpan = document.getElementById("location");
-const seasonSpan = document.getElementById("season");
+const locationStatus = document.getElementById("locationStatus");
+const manualSection = document.getElementById("manualSection");
+const analyseBtn = document.getElementById("analyseBtn");
 
-const stateSelect = document.getElementById("stateSelect");
-const districtSelect = document.getElementById("districtSelect");
 const stateSearch = document.getElementById("stateSearch");
 const districtSearch = document.getElementById("districtSearch");
+const stateSelect = document.getElementById("stateSelect");
+const districtSelect = document.getElementById("districtSelect");
 const confirmBtn = document.getElementById("confirmLocation");
+
+const summarySection = document.getElementById("summarySection");
+const summaryText = document.getElementById("summaryText");
+const downloadBtn = document.getElementById("downloadBtn");
 
 let indiaData = {};
 let currentState = "";
+let finalLocation = "";
 
-/* ---------- STEP 1: ASK LOCATION ON LOAD ---------- */
+/* -------- ON LOAD: ASK LOCATION IMMEDIATELY -------- */
 window.onload = () => {
     loadIndiaData();
+    requestLocation();
 };
-autoBtn.addEventListener("click", askForLocation);
 
-manualBtn.addEventListener("click", () => {
-    drawer.classList.toggle("hidden");
-});
-
-
-function askForLocation() {
+/* -------- LOCATION -------- */
+function requestLocation() {
     if (!navigator.geolocation) {
         showManual("Geolocation not supported");
         return;
@@ -34,95 +31,104 @@ function askForLocation() {
 
     navigator.geolocation.getCurrentPosition(
         pos => {
-            locationSpan.textContent =
-                `Lat: ${pos.coords.latitude.toFixed(3)}, Lon: ${pos.coords.longitude.toFixed(3)}`;
-            statusText.textContent = "Location detected automatically";
-            seasonSpan.textContent = detectSeason();
+            locationStatus.textContent = "📍 Location detected automatically";
+            finalLocation = `Lat ${pos.coords.latitude.toFixed(2)}, Lon ${pos.coords.longitude.toFixed(2)}`;
+            analyseBtn.disabled = false;
         },
-        () => showManual("Location permission denied")
+        () => {
+            showManual("📍 Location permission denied");
+        }
     );
 }
 
-/* ---------- STEP 2: LOAD STATES & DISTRICTS ---------- */
+function showManual(message) {
+    locationStatus.textContent = message;
+    manualSection.classList.remove("hidden");
+    manualSection.scrollIntoView({ behavior: "smooth" });
+}
+
+/* -------- LOAD DATA -------- */
 async function loadIndiaData() {
     const res = await fetch("data/india_states_districts.json");
     indiaData = await res.json();
-
     populateStates(Object.keys(indiaData));
 }
 
-/* ---------- STATE DROPDOWN ---------- */
+/* -------- STATE SEARCH -------- */
+stateSearch.addEventListener("input", () => {
+    const val = stateSearch.value.toLowerCase();
+    const filtered = Object.keys(indiaData).filter(s =>
+        s.toLowerCase().includes(val)
+    );
+    populateStates(filtered);
+});
+
+/* -------- DISTRICT SEARCH -------- */
+districtSearch.addEventListener("input", () => {
+    if (!currentState) return;
+    const val = districtSearch.value.toLowerCase();
+    const filtered = indiaData[currentState].filter(d =>
+        d.toLowerCase().includes(val)
+    );
+    populateDistricts(filtered);
+});
+
+/* -------- DROPDOWNS -------- */
 function populateStates(states) {
     stateSelect.innerHTML = "";
-    states.forEach(state => {
+    states.forEach(s => {
         const opt = document.createElement("option");
-        opt.value = state;
-        opt.textContent = state;
+        opt.value = s;
+        opt.textContent = s;
         stateSelect.appendChild(opt);
     });
 }
 
-/* ---------- DISTRICT DROPDOWN ---------- */
-function populateDistricts(state) {
-    districtSelect.innerHTML = "";
-    indiaData[state].forEach(dist => {
-        const opt = document.createElement("option");
-        opt.value = dist;
-        opt.textContent = dist;
-        districtSelect.appendChild(opt);
-    });
-}
-
-/* ---------- SEARCH SUPPORT ---------- */
-stateSearch.addEventListener("input", () => {
-    const val = stateSearch.value.toLowerCase();
-    const filtered = Object.keys(indiaData)
-        .filter(s => s.toLowerCase().includes(val));
-    populateStates(filtered);
-});
-
 stateSelect.addEventListener("change", () => {
     currentState = stateSelect.value;
-    populateDistricts(currentState);
+    populateDistricts(indiaData[currentState]);
 });
 
-districtSearch.addEventListener("input", () => {
-    const val = districtSearch.value.toLowerCase();
-    const filtered = indiaData[currentState]
-        .filter(d => d.toLowerCase().includes(val));
+function populateDistricts(districts) {
     districtSelect.innerHTML = "";
-    filtered.forEach(d => {
+    districts.forEach(d => {
         const opt = document.createElement("option");
         opt.value = d;
         opt.textContent = d;
         districtSelect.appendChild(opt);
     });
-});
+}
 
-/* ---------- CONFIRM MANUAL LOCATION ---------- */
+/* -------- CONFIRM MANUAL LOCATION -------- */
 confirmBtn.addEventListener("click", () => {
     if (!stateSelect.value || !districtSelect.value) {
         alert("Select state and district");
         return;
     }
 
-    locationSpan.textContent =
-        `${districtSelect.value}, ${stateSelect.value}`;
-
-    statusText.textContent = "Location set manually";
-    seasonSpan.textContent = detectSeason();
-
-    drawer.classList.add("hidden");
+    finalLocation = `${districtSelect.value}, ${stateSelect.value}`;
+    locationStatus.textContent = "📍 Location set manually";
+    analyseBtn.disabled = false;
 });
 
+/* -------- ANALYSE -------- */
+analyseBtn.addEventListener("click", () => {
+    summaryText.textContent =
+        `Location: ${finalLocation}\nSeason: ${detectSeason()}`;
+    summarySection.classList.remove("hidden");
+    summarySection.scrollIntoView({ behavior: "smooth" });
+});
 
-/* ---------- HELPERS ---------- */
-function showManual(message) {
-    statusText.textContent = message;
-    drawer.classList.remove("hidden");
-}
+/* -------- DOWNLOAD SUMMARY -------- */
+downloadBtn.addEventListener("click", () => {
+    const blob = new Blob([summaryText.textContent], { type: "text/plain" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "farmer_summary.txt";
+    a.click();
+});
 
-
+/* -------- SEASON -------- */
 function detectSeason() {
     const m = new Date().getMonth() + 1;
     if (m >= 6 && m <= 10) return "Kharif";

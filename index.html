@@ -1,43 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Farmer AI Assistant</title>
-    <link rel="stylesheet" href="style.css">
-</head>
 <body>
 
 <h1>Farmer AI Assistant</h1>
 
-<p id="status">Location required to continue</p>
-
-<div class="actions">
-    <button id="autoLocate">Use My Location</button>
-    <button id="manualBtn">Enter Location Manually</button>
+<!-- TOP ACTION BAR -->
+<div class="top-bar">
+    <span id="locationStatus">📍 Detecting location…</span>
+    <button id="imageBtn">🖼 Image</button>
+    <button id="analyseBtn" disabled>🧠 Analyse</button>
 </div>
 
-<!-- MANUAL LOCATION DRAWER -->
-<div id="manualDrawer" class="drawer hidden">
-
+<!-- MANUAL LOCATION SECTION -->
+<section id="manualSection" class="card hidden">
     <h3>Select your location</h3>
 
-    <label>State</label>
-    <input type="text" id="stateSearch" placeholder="Search state">
-    <select id="stateSelect"></select>
+    <div class="input-group">
+        <input type="text" id="stateSearch" placeholder="Search State">
+        <select id="stateSelect"></select>
+    </div>
 
-    <label>District</label>
-    <input type="text" id="districtSearch" placeholder="Search district">
-    <select id="districtSelect"></select>
+    <div class="input-group">
+        <input type="text" id="districtSearch" placeholder="Search District">
+        <select id="districtSelect"></select>
+    </div>
 
     <button id="confirmLocation" class="primary">Confirm Location</button>
-</div>
+</section>
 
-<div id="output">
-    <p><strong>Location:</strong> <span id="location">Not set</span></p>
-    <p><strong>Season:</strong> <span id="season">Not set</span></p>
-</div>
-
+<!-- SUMMARY SECTION -->
+<section id="summarySection" class="card hidden">
+    <h3>Summary</h3>
+    <p id="summaryText">Location and season summary will appear here.</p>
+    <button id="downloadBtn">⬇ Download Summary</button>
+</section>
 
 <script src="script.js"></script>
 </body>
-</html>
