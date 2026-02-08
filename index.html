@@ -7,15 +7,37 @@
 </head>
 <body>
 
-    <h1>Farmer AI Assistant</h1>
+<h1>Farmer AI Assistant</h1>
 
-    <button id="detectBtn">Detect My Location & Season</button>
+<p id="status">Location required to continue</p>
 
-    <div id="output">
-        <p><strong>Location:</strong> <span id="location">Not detected</span></p>
-        <p><strong>Season:</strong> <span id="season">Not detected</span></p>
-    </div>
+<div class="actions">
+    <button id="autoLocate">Use My Location</button>
+    <button id="manualBtn">Enter Location Manually</button>
+</div>
 
-    <script src="script.js"></script>
+<!-- MANUAL LOCATION DRAWER -->
+<div id="manualDrawer" class="drawer hidden">
+
+    <h3>Select your location</h3>
+
+    <label>State</label>
+    <input type="text" id="stateSearch" placeholder="Search state">
+    <select id="stateSelect"></select>
+
+    <label>District</label>
+    <input type="text" id="districtSearch" placeholder="Search district">
+    <select id="districtSelect"></select>
+
+    <button id="confirmLocation" class="primary">Confirm Location</button>
+</div>
+
+<div id="output">
+    <p><strong>Location:</strong> <span id="location">Not set</span></p>
+    <p><strong>Season:</strong> <span id="season">Not set</span></p>
+</div>
+
+
+<script src="script.js"></script>
 </body>
 </html>
