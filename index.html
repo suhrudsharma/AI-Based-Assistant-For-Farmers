@@ -65,6 +65,30 @@
                 </p>
             </div>
         </section>
+        <!-- STEP 1: LAND SIZE -->
+        <section class="card w-full">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                    <i class="fas fa-ruler-combined"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-cow-dung-green">1. Land Size</h3>
+                    <p class="text-xs text-gray-500">Enter your farm area</p>
+                </div>
+            </div>
+            <input
+                type="number"
+                id="landSizeInput"
+                class="organic-input w-full"
+                placeholder="Enter land size in acres (e.g., 2.5)"
+                min="0.1"
+                step="0.1"
+                value="1"
+            />
+            <p class="text-xs text-gray-400 mt-2">
+                💡 This helps calculate accurate yield and revenue estimates
+            </p>
+        </section>
 
         <!-- STEP 1: IMAGE UPLOAD -->
         <section class="w-full flex flex-col items-center gap-4">
@@ -92,7 +116,7 @@
             />
 
             <p class="text-cow-dung-green font-bold text-lg">
-                <span id="imageStatusText">1. Upload Soil Photo</span>
+                <span id="imageStatusText">2. Upload Soil Photo</span>
             </p>
             
             <!-- Image name display -->
@@ -109,7 +133,7 @@
             </div>
             <div>
                 <h3 class="text-xl font-bold text-cow-dung-green">
-                    2. Location Details
+                    3. Location Details
                 </h3>
                 <p id="locationStatus"
                    class="text-xs text-gray-500 font-semibold">
@@ -127,7 +151,39 @@
                     State
                 </label>
                 <div class="relative">
-    <input
+    <!-- OPTIMAL CROP HERO SECTION -->
+        <section id="optimalCropSection" class="card w-full hidden bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-500">
+            <div class="text-center">
+                <div class="inline-block bg-green-500 text-white px-4 py-2 rounded-full mb-4">
+                    <i class="fas fa-trophy"></i> Most Optimal Crop
+                </div>
+                
+                <h2 id="optimalCropName" class="text-4xl md:text-5xl font-extrabold text-cow-dung-green mb-6">
+                    Loading...
+                </h2>
+
+                <div class="grid md:grid-cols-2 gap-6 max-w-xl mx-auto">
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <p class="text-sm text-gray-500 uppercase font-bold mb-2">Projected Revenue</p>
+                        <p id="optimalRevenue" class="text-3xl font-bold text-green-600">₹0</p>
+                        <p class="text-xs text-gray-400 mt-2">Based on <span id="optimalLandSize">1.0</span> acres</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <p class="text-sm text-gray-500 uppercase font-bold mb-2">Suitability Score</p>
+                        <p id="optimalSuitability" class="text-3xl font-bold text-blue-600">0%</p>
+                        <p class="text-xs text-gray-400 mt-2">Climate & soil match</p>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-amber-50 border-l-4 border-amber-500 p-4 rounded-lg">
+                    <p class="text-sm text-gray-700">
+                        <i class="fas fa-info-circle text-amber-500"></i>
+                        <strong>Expected Yield:</strong> <span id="optimalYield">0</span> tons from your <span id="optimalLandSize2">1.0</span> acre farm
+                    </p>
+                </div>
+            </div>
+        </section><input
         type="text"
         id="stateInput"
         class="organic-input"
@@ -172,7 +228,7 @@
         <!-- STEP 3: ANALYSE -->
         <button id="analyseBtn" disabled
             class="w-full max-w-md organic-btn bg-gray-300 text-gray-500 py-4 text-xl font-bold flex items-center justify-center gap-3 cursor-not-allowed transition-all duration-300 shadow-sm">
-            <i class="fas fa-brain"></i> 
+            <i class="fas fa-brain" id="analyseBtnIcon"></i>
             <span id="analyseBtnText">Analyse Soil Health</span>
         </button>
 
@@ -227,34 +283,61 @@
 
 <!-- SCATTER CHART -->
 <div id="chartSection" class="mt-8 hidden">
-    <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">
+    <h4 class="text-sm font-bold text-gray-500 uppercase mb-4">
         Risk vs Reward Analysis
     </h4>
-    <div class="bg-white p-4 rounded-xl border">
+    <p class="text-xs text-gray-500 mb-3">
+        <strong>X-Axis:</strong> Suitability % (higher = better match) | 
+        <strong>Y-Axis:</strong> Revenue ₹ (higher = more profit)
+    </p>
+    <div class="bg-white p-4 rounded-xl border shadow-sm">
         <canvas id="riskChart" height="280"></canvas>
     </div>
 </div>
 
         </section>
+        <!-- CHATBOT SECTION -->
+        <section id="chatbotSection" class="card w-full hidden">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">
+                    Ask Agri-Expert AI
+                </h3>
+            </div>
+
+            <div class="bg-gray-50 rounded-xl border border-gray-200 p-4 mb-4 h-80 overflow-y-auto" id="chatMessages">
+                <div class="flex gap-3 mb-4">
+                    <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs flex-shrink-0">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl shadow-sm max-w-md">
+                        <p class="text-sm text-gray-700">
+                            I've analyzed your farm data. Ask me anything about the recommendations!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <input
+                    type="text"
+                    id="chatInput"
+                    class="flex-1 organic-input"
+                    placeholder="Ask: Why did you recommend rice?"
+                    onkeypress="if(event.key==='Enter') sendChatMessage()"
+                />
+                <button
+                    onclick="sendChatMessage()"
+                    class="organic-btn bg-cow-dung-green text-white px-6 hover:bg-cow-dung-light">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </section>
 
     </main>
-    <!-- Land Size -->
-<div class="mt-4">
-    <label class="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">
-        Land Size (Acres)
-    </label>
-    <input
-        type="number"
-        id="landSizeInput"
-        class="organic-input"
-        placeholder="Enter land size (default: 1 acre)"
-        min="0.1"
-        step="0.1"
-    />
-    <p class="text-xs text-gray-400 mt-1">
-        If left empty, 1 acre will be assumed.
-    </p>
-</div>
+   
 
     <footer class="bg-cow-dung-green text-ivory-cream py-6 text-center mt-auto">
         <p class="text-sm opacity-70">

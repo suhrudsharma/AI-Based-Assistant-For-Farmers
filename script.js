@@ -456,7 +456,9 @@ async function handleAnalyse() {
     // Show loading spinner
     loadingSpinner.classList.remove("hidden");
     analyseBtn.disabled = true;
-    analyseBtnText.textContent = "Analyzing...";
+    const analyseBtnIcon = document.getElementById('analyseBtnIcon');
+analyseBtnText.textContent = "Analyzing...";
+analyseBtnIcon.className = "fas fa-spinner fa-spin";
 
     // Scroll to loading spinner
     setTimeout(() => {
@@ -517,6 +519,8 @@ formData.append("land_size", landSize);
 };
 
 appState.result = normalizedResult;
+// Display optimal crop hero section
+        displayOptimalCrop(normalizedResult);
 renderSummary(normalizedResult);
 renderCropTable(normalizedResult.full_table);
 renderScatterChart(normalizedResult.scatter_graph);
@@ -528,6 +532,15 @@ renderScatterChart(normalizedResult.scatter_graph);
         loadingSpinner.classList.add("hidden");
         
         summarySection.classList.remove("hidden");
+        // Update button to show completion
+        analyseBtnText.textContent = "✓ Analysis Complete";
+        analyseBtnIcon.className = "fas fa-check-circle";
+        analyseBtn.classList.remove('bg-cow-dung-green');
+        analyseBtn.classList.add('bg-green-600');
+        
+        // Show chatbot section
+        const chatbotSection = document.getElementById('chatbotSection');
+        if (chatbotSection) chatbotSection.classList.remove('hidden');
 
         // Scroll to summary
         setTimeout(() => {
@@ -543,7 +556,9 @@ renderScatterChart(normalizedResult.scatter_graph);
         
         // Re-enable analyse button
         analyseBtn.disabled = false;
-        checkAnalyseButtonState();
+analyseBtnText.textContent = "Analyse Soil Health";
+analyseBtnIcon.className = "fas fa-brain";
+checkAnalyseButtonState();
     }
 }
 
@@ -556,7 +571,7 @@ function renderSummary(summary) {
         <div class="space-y-4">
             <div class="border-b border-gray-200 pb-3">
                 <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">Soil Analysis</h4>
-                <p class="text-lg"><span class="font-semibold">Soil Type:</span> ${summary.soil_type || 'N/A'}</p>
+                <p class="text-lg"><span class="font-semibold">Soil Type:</span> ${(summary.soil_type || 'N/A').replace(/_/g, ' ')}</p>
             </div>
 
             <div class="border-b border-gray-200 pb-3">
@@ -576,31 +591,34 @@ function renderSummary(summary) {
                 </ul>
             </div>
 
-            <div>
-                <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">Nutrient Profile</h4>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-blue-50 p-3 rounded-lg">
-                        <p class="text-xs text-gray-600">Nitrogen (N)</p>
-                        <p class="text-xl font-bold text-blue-600">${summary.nutrient_profile?.N || 'N/A'}</p>
-                    </div>
-                    <div class="bg-orange-50 p-3 rounded-lg">
-                        <p class="text-xs text-gray-600">Phosphorus (P)</p>
-                        <p class="text-xl font-bold text-orange-600">${summary.nutrient_profile?.P || 'N/A'}</p>
-                    </div>
-                    <div class="bg-purple-50 p-3 rounded-lg">
-                        <p class="text-xs text-gray-600">Potassium (K)</p>
-                        <p class="text-xl font-bold text-purple-600">${summary.nutrient_profile?.K || 'N/A'}</p>
-                    </div>
-                    <div class="bg-green-50 p-3 rounded-lg">
-                        <p class="text-xs text-gray-600">pH Level</p>
-                        <p class="text-xl font-bold text-green-600">${summary.nutrient_profile?.ph || 'N/A'}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+            
     `;
 
     summaryText.innerHTML = summaryHTML;
+}
+// ================== DISPLAY OPTIMAL CROP HERO ==================
+function displayOptimalCrop(result) {
+    const landSize = parseFloat(landSizeInput?.value) || 1;
+    const optimalCropSection = document.getElementById('optimalCropSection');
+    
+    if (!optimalCropSection) return;
+    
+    document.getElementById('optimalCropName').textContent = 
+        result.recommended_crop.charAt(0).toUpperCase() + result.recommended_crop.slice(1);
+    
+    document.getElementById('optimalRevenue').textContent = 
+        `₹${result.revenue?.toLocaleString('en-IN') || '0'}`;
+    
+    document.getElementById('optimalSuitability').textContent = 
+        `${result.suitability || 0}%`;
+    
+    document.getElementById('optimalYield').textContent = 
+        result.full_table[0]?.yield_ton || '0';
+    
+    document.getElementById('optimalLandSize').textContent = landSize.toFixed(1);
+    document.getElementById('optimalLandSize2').textContent = landSize.toFixed(1);
+    
+    optimalCropSection.classList.remove('hidden');
 }
 function renderCropTable(rows) {
     cropTableBody.innerHTML = "";
@@ -623,6 +641,8 @@ function renderCropTable(rows) {
 }
 let riskChart = null;
 
+
+
 function renderScatterChart(points) {
     if (!riskChartCanvas) return;
 
@@ -630,39 +650,88 @@ function renderScatterChart(points) {
         riskChart.destroy();
     }
 
+    // Color code: optimal crop = green, others = blue
+    const optimalCrop = appState.result?.recommended_crop;
+    const colors = points.map(p => p.crop === optimalCrop ? '#10b981' : '#4A5D23');
+    const sizes = points.map(p => p.crop === optimalCrop ? 12 : 7);
+
     riskChart = new Chart(riskChartCanvas, {
         type: "scatter",
         data: {
             datasets: [{
                 label: "Crops",
                 data: points,
-                backgroundColor: "#4A5D23",
-                pointRadius: 7,
-                pointHoverRadius: 10
+                backgroundColor: colors,
+                pointRadius: sizes,
+                pointHoverRadius: 14,
+                borderColor: '#fff',
+                borderWidth: 2
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
                 tooltip: {
+                    backgroundColor: '#fff',
+                    titleColor: '#000',
+                    bodyColor: '#666',
+                    borderColor: '#ddd',
+                    borderWidth: 1,
+                    padding: 12,
+                    displayColors: false,
                     callbacks: {
+                        title: (ctx) => {
+                            return ctx[0].raw.crop.toUpperCase();
+                        },
                         label: (ctx) => {
                             const p = ctx.raw;
-                            return `${p.crop}: ${p.x}% suitability, ₹${p.y.toLocaleString()}`;
+                            return [
+                                `Suitability: ${p.x}%`,
+                                `Revenue: ₹${p.y.toLocaleString('en-IN')}`
+                            ];
                         }
                     }
                 }
             },
             scales: {
                 x: {
-                    title: { display: true, text: "Suitability (%)" },
+                    title: { 
+                        display: true, 
+                        text: "Suitability Score (%)",
+                        font: { size: 14, weight: 'bold' },
+                        color: '#4A5D23'
+                    },
                     min: 0,
-                    max: 100
+                    max: 100,
+                    grid: {
+                        color: '#f0f0f0',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
                 },
                 y: {
-                    title: { display: true, text: "Revenue (₹)" },
-                    beginAtZero: true
+                    title: { 
+                        display: true, 
+                        text: "Projected Revenue (₹)",
+                        font: { size: 14, weight: 'bold' },
+                        color: '#4A5D23'
+                    },
+                    beginAtZero: true,
+                    grid: {
+                        color: '#f0f0f0',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value.toLocaleString('en-IN');
+                        }
+                    }
                 }
             }
         }
@@ -720,7 +789,105 @@ if (!districtInput.contains(e.target) && !districtDropdown.contains(e.target)) {
 }
 
 });
+// ================== CHATBOT FUNCTIONALITY ==================
+let chatThreadId = null;
 
+async function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    const chatMessages = document.getElementById('chatMessages');
+    const question = input.value.trim();
+    
+    if (!question) return;
+    
+    // Add user message to chat
+    const userMsgDiv = document.createElement('div');
+    userMsgDiv.className = 'flex gap-3 mb-4 justify-end';
+    userMsgDiv.innerHTML = `
+        <div class="bg-cow-dung-green text-white p-3 rounded-xl shadow-sm max-w-md">
+            <p class="text-sm">${question}</p>
+        </div>
+        <div class="w-8 h-8 bg-cow-dung-green rounded-full flex items-center justify-center text-white text-xs flex-shrink-0">
+            <i class="fas fa-user"></i>
+        </div>
+    `;
+    chatMessages.appendChild(userMsgDiv);
+    input.value = '';
+    
+    // Add "thinking" message
+    const thinkingDiv = document.createElement('div');
+    thinkingDiv.className = 'flex gap-3 mb-4';
+    thinkingDiv.id = 'thinkingMessage';
+    thinkingDiv.innerHTML = `
+        <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs flex-shrink-0">
+            <i class="fas fa-robot"></i>
+        </div>
+        <div class="bg-gray-200 p-3 rounded-xl shadow-sm max-w-md">
+            <p class="text-sm text-gray-600"><i class="fas fa-spinner fa-spin"></i> Thinking...</p>
+        </div>
+    `;
+    chatMessages.appendChild(thinkingDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // Prepare context from analysis
+    const context = appState.result ? 
+        `Soil: ${appState.result.soil_type} in ${appState.result.location}. Best Crop: ${appState.result.recommended_crop} (Suitability: ${appState.result.suitability}%, Revenue: ₹${appState.result.revenue}). Alternatives: ${appState.result.top_3_crops.join(", ")}.` 
+        : "No analysis data available yet.";
+    
+    try {
+        const response = await fetch('https://nirmalll17-devsoc.hf.space/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                question: question,
+                context: context,
+                thread_id: chatThreadId
+            })
+        });
+        
+        const data = await response.json();
+        
+        // Remove thinking message
+        document.getElementById('thinkingMessage')?.remove();
+        
+        if (data.reply) {
+            // Save thread ID for conversation continuity
+            if (data.thread_id) chatThreadId = data.thread_id;
+            
+            // Add bot response
+            const botMsgDiv = document.createElement('div');
+            botMsgDiv.className = 'flex gap-3 mb-4';
+            botMsgDiv.innerHTML = `
+                <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs flex-shrink-0">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="bg-white p-3 rounded-xl shadow-sm max-w-md">
+                    <p class="text-sm text-gray-700">${data.reply}</p>
+                </div>
+            `;
+            chatMessages.appendChild(botMsgDiv);
+        } else {
+            throw new Error('No reply from AI');
+        }
+        
+    } catch (error) {
+        console.error('Chat error:', error);
+        document.getElementById('thinkingMessage')?.remove();
+        
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'flex gap-3 mb-4';
+        errorDiv.innerHTML = `
+            <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white text-xs flex-shrink-0">
+                <i class="fas fa-exclamation"></i>
+            </div>
+            <div class="bg-red-50 p-3 rounded-xl shadow-sm max-w-md border border-red-200">
+                <p class="text-sm text-red-700">Sorry, I couldn't process your question. Please try again.</p>
+            </div>
+        `;
+        chatMessages.appendChild(errorDiv);
+    }
+    
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
 function generatePDFContent() {
     const result = appState.result;
     const date = new Date().toLocaleDateString('en-IN');
