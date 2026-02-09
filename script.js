@@ -2,6 +2,7 @@
 const faqBtn = document.getElementById("faqBtn");
 const faqModal = document.getElementById("faqModal");
 const closeFaq = document.getElementById("closeFaq");
+const landSizeInput = document.getElementById("landSizeInput");
 
 const locationStatus = document.getElementById("locationStatus");
 const locationSection = document.getElementById("locationSection");
@@ -29,6 +30,10 @@ const stateDropdown = document.getElementById("stateDropdown");
 const districtInput = document.getElementById("districtInput");
 const districtDropdown = document.getElementById("districtDropdown");
 
+const tableSection = document.getElementById("tableSection");
+const cropTableBody = document.getElementById("cropTableBody");
+const chartSection = document.getElementById("chartSection");
+const riskChartCanvas = document.getElementById("riskChart");
 
 // ================== GLOBAL STATE ==================
 let appState = {
@@ -324,7 +329,7 @@ const district = districtInput.value.trim();
     locationStatus.classList.add("text-green-600");
 
     // Hide manual inputs after confirmation
-    appState.locationMethod = 'gps';
+    
 manualLocationInputs.classList.add("hidden");
 
 checkAnalyseButtonState();
@@ -463,7 +468,13 @@ async function handleAnalyse() {
     formData.append("file", appState.imageFile);  // ✅ Changed from "image" to "file"
     formData.append("lat", appState.location.lat.toString());  // ✅ Separate lat field
     formData.append("lon", appState.location.lon.toString());  // ✅ Separate lon field
-    formData.append("land_size", "1");
+    const landSizeValue = landSizeInput?.value;
+const landSize = landSizeValue && Number(landSizeValue) > 0
+    ? landSizeValue
+    : "1";
+
+formData.append("land_size", landSize);
+
     console.log("Sending request with:");
     console.log("- file:", appState.imageFile.name);
     console.log("- lat:", appState.location.lat);
@@ -492,13 +503,25 @@ async function handleAnalyse() {
         }
 
         // Store result
-        appState.result = data;
-renderSummary({
+       const normalizedResult = {
     soil_type: data.soil,
-    recommended_crop: data.optimal_crop?.crop,
-    top_3_crops: data.recommendations?.slice(0,3).map(r => r.crop),
-    nutrient_profile: {}
-});
+    location: data.location,
+    recommended_crop: data.optimal_crop?.crop || "N/A",
+    suitability: data.optimal_crop?.suitability,
+    revenue: data.optimal_crop?.revenue,
+    top_3_crops: data.recommendations
+        ? data.recommendations.slice(0, 3).map(r => r.crop)
+        : [],
+    full_table: data.recommendations || [],
+    scatter_graph: data.scatter_graph || []
+};
+
+appState.result = normalizedResult;
+renderSummary(normalizedResult);
+renderCropTable(normalizedResult.full_table);
+renderScatterChart(normalizedResult.scatter_graph);
+
+
 
 
         // Hide loading, show results
@@ -537,9 +560,11 @@ function renderSummary(summary) {
             </div>
 
             <div class="border-b border-gray-200 pb-3">
-                <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">Weather Conditions</h4>
-                <p><span class="font-semibold">Current Weather:</span> ${summary.weather || 'N/A'}</p>
-                <p><span class="font-semibold">Rainfall Estimate:</span> ${summary.rainfall_est || 'N/A'}</p>
+                <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">Season Context</h4>
+<p class="text-sm text-gray-500">
+    Seasonal and weather factors were considered internally by the AI.
+</p>
+
             </div>
 
             <div class="border-b border-gray-200 pb-3">
@@ -576,6 +601,74 @@ function renderSummary(summary) {
     `;
 
     summaryText.innerHTML = summaryHTML;
+}
+function renderCropTable(rows) {
+    cropTableBody.innerHTML = "";
+
+    rows.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.className = "border-t";
+
+        tr.innerHTML = `
+            <td class="p-3 font-semibold">${r.crop}</td>
+            <td class="p-3 text-center">${r.suitability}%</td>
+            <td class="p-3 text-center">${r.yield_ton}</td>
+            <td class="p-3 text-center">₹${r.revenue.toLocaleString()}</td>
+        `;
+
+        cropTableBody.appendChild(tr);
+    });
+
+    tableSection.classList.remove("hidden");
+}
+let riskChart = null;
+
+function renderScatterChart(points) {
+    if (!riskChartCanvas) return;
+
+    if (riskChart) {
+        riskChart.destroy();
+    }
+
+    riskChart = new Chart(riskChartCanvas, {
+        type: "scatter",
+        data: {
+            datasets: [{
+                label: "Crops",
+                data: points,
+                backgroundColor: "#4A5D23",
+                pointRadius: 7,
+                pointHoverRadius: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => {
+                            const p = ctx.raw;
+                            return `${p.crop}: ${p.x}% suitability, ₹${p.y.toLocaleString()}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: "Suitability (%)" },
+                    min: 0,
+                    max: 100
+                },
+                y: {
+                    title: { display: true, text: "Revenue (₹)" },
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    chartSection.classList.remove("hidden");
 }
 
 // ================== PDF DOWNLOAD ==================

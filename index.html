@@ -28,6 +28,8 @@
             }
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <body class="bg-ivory-cream text-gray-800 font-sans antialiased min-h-screen flex flex-col">
@@ -192,18 +194,67 @@
             </div>
 
             <div class="bg-ivory-cream p-4 rounded-xl border border-cow-dung-green/10 mb-6">
-                <div id="summaryText" class="text-gray-600 leading-relaxed whitespace-pre-line">
-                    Report details...
-                </div>
+                <div id="summaryText" class="space-y-4 text-gray-700">
+    <!-- Filled dynamically by JS -->
+</div>
+
             </div>
 
             <button id="downloadBtn"
                 class="organic-btn border-2 border-cow-dung-green text-cow-dung-green w-full py-3 font-bold hover:bg-cow-dung-green hover:text-white flex justify-center items-center gap-2">
                 <i class="fas fa-download"></i> Download Report as PDF
             </button>
+            <!-- RECOMMENDATION TABLE -->
+<div id="tableSection" class="mt-6 hidden">
+    <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">
+        Crop Comparison
+    </h4>
+
+    <div class="overflow-x-auto">
+        <table class="w-full border border-gray-200 rounded-lg text-sm">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="p-3 text-left">Crop</th>
+                    <th class="p-3">Suitability %</th>
+                    <th class="p-3">Yield (tons)</th>
+                    <th class="p-3">Revenue (₹)</th>
+                </tr>
+            </thead>
+            <tbody id="cropTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- SCATTER CHART -->
+<div id="chartSection" class="mt-8 hidden">
+    <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">
+        Risk vs Reward Analysis
+    </h4>
+    <div class="bg-white p-4 rounded-xl border">
+        <canvas id="riskChart" height="280"></canvas>
+    </div>
+</div>
+
         </section>
 
     </main>
+    <!-- Land Size -->
+<div class="mt-4">
+    <label class="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">
+        Land Size (Acres)
+    </label>
+    <input
+        type="number"
+        id="landSizeInput"
+        class="organic-input"
+        placeholder="Enter land size (default: 1 acre)"
+        min="0.1"
+        step="0.1"
+    />
+    <p class="text-xs text-gray-400 mt-1">
+        If left empty, 1 acre will be assumed.
+    </p>
+</div>
 
     <footer class="bg-cow-dung-green text-ivory-cream py-6 text-center mt-auto">
         <p class="text-sm opacity-70">
@@ -234,6 +285,7 @@
         </button>
     </div>
 </div>
+
 
 
     <!-- JavaScript -->
