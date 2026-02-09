@@ -1,12 +1,15 @@
 // ================== DOM ELEMENTS ==================
+const faqBtn = document.getElementById("faqBtn");
+const faqModal = document.getElementById("faqModal");
+const closeFaq = document.getElementById("closeFaq");
+
 const locationStatus = document.getElementById("locationStatus");
 const locationSection = document.getElementById("locationSection");
 const manualLocationInputs = document.getElementById("manualLocationInputs");
 const analyseBtn = document.getElementById("analyseBtn");
 const analyseBtnText = document.getElementById("analyseBtnText");
 
-const stateSelect = document.getElementById("stateSelect");
-const districtSelect = document.getElementById("districtSelect");
+
 const confirmBtn = document.getElementById("confirmLocation");
 
 const imageBtn = document.getElementById("imageBtn");
@@ -20,6 +23,12 @@ const loadingSpinner = document.getElementById("loadingSpinner");
 const summarySection = document.getElementById("summarySection");
 const summaryText = document.getElementById("summaryText");
 const downloadBtn = document.getElementById("downloadBtn");
+const stateInput = document.getElementById("stateInput");
+const stateDropdown = document.getElementById("stateDropdown");
+
+const districtInput = document.getElementById("districtInput");
+const districtDropdown = document.getElementById("districtDropdown");
+
 
 // ================== GLOBAL STATE ==================
 let appState = {
@@ -90,56 +99,80 @@ async function loadStatesData() {
         }
         statesData = await response.json();
         console.log("States data loaded:", Object.keys(statesData).length, "states");
-        populateStates();
+        
     } catch (error) {
         console.error("Error loading states data:", error);
         alert("⚠️ Error loading location data. Please refresh the page.");
     }
+    checkManualLocationComplete();
+
 }
 
 // ================== POPULATE STATES DROPDOWN ==================
-function populateStates() {
-    // Clear existing options except placeholder
-    stateSelect.innerHTML = '<option value="">Select State</option>';
+
+function filterStates(query) {
+    stateDropdown.innerHTML = "";
+    const matches = Object.keys(statesData)
+        .filter(s => s.toLowerCase().includes(query.toLowerCase()));
+
+    if (matches.length === 0) {
+        stateDropdown.innerHTML = `<li class="px-4 py-2 text-gray-400">No matches found</li>`;
+    } else {
+        matches.forEach(state => {
+            const li = document.createElement("li");
+            li.textContent = state;
+            li.className = "px-4 py-2 cursor-pointer hover:bg-gray-100";
+            li.onclick = () => selectState(state);
+            stateDropdown.appendChild(li);
+        });
+    }
+
+    stateDropdown.classList.remove("hidden");
+}
+function selectState(state) {
+    stateInput.value = state;
+    stateDropdown.classList.add("hidden");
+
+    districtInput.disabled = false;
+    districtInput.value = "";
+    districtDropdown.innerHTML = "";
+
     
-    // Sort states alphabetically
-    const sortedStates = Object.keys(statesData).sort();
-    
-    // Add each state as an option
-    sortedStates.forEach(state => {
-        const option = document.createElement('option');
-        option.value = state;
-        option.textContent = state;
-        stateSelect.appendChild(option);
-    });
-    
-    console.log("States populated:", sortedStates.length);
+    checkManualLocationComplete();
 }
 
+
 // ================== POPULATE DISTRICTS BASED ON STATE ==================
-function populateDistricts(selectedState) {
-    // Clear districts
-    districtSelect.innerHTML = '<option value="">Select District</option>';
-    
-    if (!selectedState || !statesData[selectedState]) {
-        districtSelect.disabled = true;
-        return;
+
+
+
+function filterDistricts(query) {
+    const state = stateInput.value.trim();
+    districtDropdown.innerHTML = "";
+
+    if (!statesData[state]) return;
+
+    const matches = statesData[state]
+        .filter(d => d.toLowerCase().includes(query.toLowerCase()));
+
+    if (matches.length === 0) {
+        districtDropdown.innerHTML = `<li class="px-4 py-2 text-gray-400">No matches found</li>`;
+    } else {
+        matches.forEach(dist => {
+            const li = document.createElement("li");
+            li.textContent = dist;
+            li.className = "px-4 py-2 cursor-pointer hover:bg-gray-100";
+            li.onclick = () => selectDistrict(dist);
+            districtDropdown.appendChild(li);
+        });
     }
-    
-    districtSelect.disabled = false;
-    
-    // Get districts for selected state and sort them
-    const districts = statesData[selectedState].sort();
-    
-    // Add each district as an option
-    districts.forEach(district => {
-        const option = document.createElement('option');
-        option.value = district;
-        option.textContent = district;
-        districtSelect.appendChild(option);
-    });
-    
-    console.log("Districts populated for", selectedState, ":", districts.length);
+
+    districtDropdown.classList.remove("hidden");
+}
+function selectDistrict(district) {
+    districtInput.value = district;
+    districtDropdown.classList.add("hidden");
+    checkManualLocationComplete();
 }
 
 // ================== EVENT LISTENERS SETUP ==================
@@ -152,15 +185,7 @@ function setupEventListeners() {
     // Image input change
     imageInput.addEventListener("change", handleImageUpload);
 
-    // State select change - populate districts
-    stateSelect.addEventListener("change", (e) => {
-        const selectedState = e.target.value;
-        populateDistricts(selectedState);
-        checkManualLocationComplete();
-    });
 
-    // District select change
-    districtSelect.addEventListener("change", checkManualLocationComplete);
 
     // Confirm location button
     confirmBtn.addEventListener("click", handleManualLocation);
@@ -170,7 +195,46 @@ function setupEventListeners() {
 
     // Download button
     downloadBtn.addEventListener("click", handleDownloadPDF);
+    // FAQ button
+faqBtn.addEventListener("click", () => {
+    faqModal.classList.remove("hidden");
+    faqModal.classList.add("flex");
+});
+
+// Close FAQ
+closeFaq.addEventListener("click", () => {
+    faqModal.classList.add("hidden");
+    faqModal.classList.remove("flex");
+});
+
+// Close FAQ on background click
+faqModal.addEventListener("click", (e) => {
+    if (e.target === faqModal) {
+        faqModal.classList.add("hidden");
+        faqModal.classList.remove("flex");
+    }
+
+});
+stateInput.addEventListener("input", (e) => {
+    const value = e.target.value.trim();
+    if (!value) {
+        stateDropdown.classList.add("hidden");
+        return;
+    }
+    filterStates(value);
+});
+districtInput.addEventListener("input", (e) => {
+    const value = e.target.value.trim();
+    if (!value) {
+        districtDropdown.classList.add("hidden");
+        return;
+    }
+    filterDistricts(value);
+});
+
+
 }
+
 
 // ================== LOCATION HANDLING ==================
 function requestLocation() {
@@ -192,7 +256,7 @@ function requestLocation() {
                 lat: lat,
                 lon: lon
             };
-            appState.locationMethod = 'gps';
+            
 
             locationStatus.innerHTML = `✅ Location detected automatically<br><span class="text-xs opacity-70">Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}</span>`;
             locationStatus.classList.add("text-green-600");
@@ -235,8 +299,9 @@ function showManualLocationInputs(message) {
 }
 
 function handleManualLocation() {
-    const state = stateSelect.value.trim();
-    const district = districtSelect.value.trim();
+    const state = stateInput.value.trim();
+const district = districtInput.value.trim();
+
 
     if (!state || !district) {
         alert("⚠️ Please select both state and district.");
@@ -259,18 +324,24 @@ function handleManualLocation() {
     locationStatus.classList.add("text-green-600");
 
     // Hide manual inputs after confirmation
-    manualLocationInputs.classList.add("hidden");
+    appState.locationMethod = 'gps';
+manualLocationInputs.classList.add("hidden");
+
+checkAnalyseButtonState();
+
 
     console.log("Manual location set:", appState.location);
     checkAnalyseButtonState();
 }
 
 function checkManualLocationComplete() {
-    // Real-time validation feedback
-    const state = stateSelect.value.trim();
-    const district = districtSelect.value.trim();
-    
-    if (state && district) {
+    const state = stateInput.value.trim();
+    const district = districtInput.value.trim();
+
+    const validState = statesData[state];
+    const validDistrict = validState && validState.includes(district);
+
+    if (validState && validDistrict) {
         confirmBtn.classList.remove("opacity-50");
         confirmBtn.disabled = false;
     } else {
@@ -278,6 +349,8 @@ function checkManualLocationComplete() {
         confirmBtn.disabled = true;
     }
 }
+
+
 
 // ================== IMAGE HANDLING ==================
 function handleImageUpload(event) {
@@ -363,6 +436,8 @@ function checkAnalyseButtonState() {
 
 // ================== ANALYSE FUNCTIONALITY ==================
 async function handleAnalyse() {
+    
+
     if (!appState.location || !appState.imageFile) {
         alert("⚠️ Please upload an image and set location before analyzing.");
         return;
@@ -388,7 +463,7 @@ async function handleAnalyse() {
     formData.append("file", appState.imageFile);  // ✅ Changed from "image" to "file"
     formData.append("lat", appState.location.lat.toString());  // ✅ Separate lat field
     formData.append("lon", appState.location.lon.toString());  // ✅ Separate lon field
-
+    formData.append("land_size", "1");
     console.log("Sending request with:");
     console.log("- file:", appState.imageFile.name);
     console.log("- lat:", appState.location.lat);
@@ -417,11 +492,18 @@ async function handleAnalyse() {
         }
 
         // Store result
-        appState.result = data.summary;
+        appState.result = data;
+renderSummary({
+    soil_type: data.soil,
+    recommended_crop: data.optimal_crop?.crop,
+    top_3_crops: data.recommendations?.slice(0,3).map(r => r.crop),
+    nutrient_profile: {}
+});
+
 
         // Hide loading, show results
         loadingSpinner.classList.add("hidden");
-        renderSummary(data.summary);
+        
         summarySection.classList.remove("hidden");
 
         // Scroll to summary
@@ -536,6 +618,15 @@ async function handleDownloadPDF() {
         downloadBtn.disabled = false;
     }
 }
+document.addEventListener("click", (e) => {
+    if (!stateInput.contains(e.target) && !stateDropdown.contains(e.target)) {
+    stateDropdown.classList.add("hidden");
+}
+if (!districtInput.contains(e.target) && !districtDropdown.contains(e.target)) {
+    districtDropdown.classList.add("hidden");
+}
+
+});
 
 function generatePDFContent() {
     const result = appState.result;

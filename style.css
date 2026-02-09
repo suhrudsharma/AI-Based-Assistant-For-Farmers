@@ -82,11 +82,13 @@ button:disabled {
 #imagePreview {
     transition: opacity 0.3s ease;
 }
-
-#imagePreview.hidden {
-    opacity: 0;
-    pointer-events: none;
+#imagePreview {
+    transition: opacity 0.3s ease;
 }
+#imagePreview.hidden {
+    display: none;
+}
+
 
 /* Smooth transitions for sections */
 #manualLocationInputs,
@@ -164,7 +166,7 @@ select.organic-input {
         background: white;
     }
     
-    nav, footer, button {
+    nav, footer, .no-print {
         display: none !important;
     }
     
