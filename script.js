@@ -44,6 +44,9 @@ let appState = {
     result: null
 };
 
+let currentUnit = 'acres'; // 'acres' or 'hectares'
+let chatOpen = false;
+
 let statesData = {}; // Will hold the JSON data
 
 // ================== STATE TO COORDINATES MAPPING (FOR MANUAL LOCATION) ==================
@@ -104,7 +107,7 @@ async function loadStatesData() {
         }
         statesData = await response.json();
         console.log("States data loaded:", Object.keys(statesData).length, "states");
-        
+
     } catch (error) {
         console.error("Error loading states data:", error);
         alert("⚠️ Error loading location data. Please refresh the page.");
@@ -142,7 +145,7 @@ function selectState(state) {
     districtInput.value = "";
     districtDropdown.innerHTML = "";
 
-    
+
     checkManualLocationComplete();
 }
 
@@ -190,8 +193,6 @@ function setupEventListeners() {
     // Image input change
     imageInput.addEventListener("change", handleImageUpload);
 
-
-
     // Confirm location button
     confirmBtn.addEventListener("click", handleManualLocation);
 
@@ -200,44 +201,90 @@ function setupEventListeners() {
 
     // Download button
     downloadBtn.addEventListener("click", handleDownloadPDF);
+
     // FAQ button
-faqBtn.addEventListener("click", () => {
-    faqModal.classList.remove("hidden");
-    faqModal.classList.add("flex");
-});
-
-// Close FAQ
-closeFaq.addEventListener("click", () => {
-    faqModal.classList.add("hidden");
-    faqModal.classList.remove("flex");
-});
-
-// Close FAQ on background click
-faqModal.addEventListener("click", (e) => {
-    if (e.target === faqModal) {
+    faqBtn.addEventListener("click", () => {
+        faqModal.classList.remove("hidden");
+        faqModal.classList.add("flex");
+    });
+    closeFaq.addEventListener("click", () => {
         faqModal.classList.add("hidden");
         faqModal.classList.remove("flex");
-    }
+    });
+    faqModal.addEventListener("click", (e) => {
+        if (e.target === faqModal) {
+            faqModal.classList.add("hidden");
+            faqModal.classList.remove("flex");
+        }
+    });
 
-});
-stateInput.addEventListener("input", (e) => {
-    const value = e.target.value.trim();
-    if (!value) {
-        stateDropdown.classList.add("hidden");
-        return;
-    }
-    filterStates(value);
-});
-districtInput.addEventListener("input", (e) => {
-    const value = e.target.value.trim();
-    if (!value) {
-        districtDropdown.classList.add("hidden");
-        return;
-    }
-    filterDistricts(value);
-});
+    // State/District inputs
+    stateInput.addEventListener("input", (e) => {
+        const value = e.target.value.trim();
+        if (!value) { stateDropdown.classList.add("hidden"); return; }
+        filterStates(value);
+    });
+    districtInput.addEventListener("input", (e) => {
+        const value = e.target.value.trim();
+        if (!value) { districtDropdown.classList.add("hidden"); return; }
+        filterDistricts(value);
+    });
 
+    // ===== UNIT TOGGLE =====
+    document.querySelectorAll('.unit-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const newUnit = btn.dataset.unit;
+            if (newUnit === currentUnit) return;
 
+            // Convert value
+            const input = landSizeInput;
+            let val = parseFloat(input.value) || 1;
+            if (newUnit === 'hectares') {
+                val = val * 0.4047; // acres → hectares
+            } else {
+                val = val / 0.4047; // hectares → acres
+            }
+            input.value = Math.round(val * 100) / 100;
+            input.placeholder = `Enter land size in ${newUnit} (e.g., ${newUnit === 'acres' ? '2.5' : '1.0'})`;
+
+            currentUnit = newUnit;
+
+            // Update button styles
+            document.querySelectorAll('.unit-btn').forEach(b => {
+                b.classList.remove('bg-cow-dung-green', 'text-white');
+                b.classList.add('bg-white', 'text-gray-600');
+            });
+            btn.classList.remove('bg-white', 'text-gray-600');
+            btn.classList.add('bg-cow-dung-green', 'text-white');
+
+            // Update unit labels throughout the page
+            document.querySelectorAll('.land-unit-label').forEach(el => {
+                el.textContent = newUnit;
+            });
+        });
+    });
+
+    // ===== CHAT FAB + POPUP =====
+    const chatFab = document.getElementById('chatFab');
+    const chatPopup = document.getElementById('chatPopup');
+    const chatClose = document.getElementById('chatClose');
+
+    chatFab.addEventListener('click', () => {
+        chatOpen = !chatOpen;
+        if (chatOpen) {
+            chatPopup.classList.remove('hidden');
+            chatFab.querySelector('#chatFabIcon').className = 'fas fa-times';
+            document.getElementById('chatBadge')?.classList.add('hidden');
+        } else {
+            chatPopup.classList.add('hidden');
+            chatFab.querySelector('#chatFabIcon').className = 'fas fa-comments';
+        }
+    });
+    chatClose.addEventListener('click', () => {
+        chatOpen = false;
+        chatPopup.classList.add('hidden');
+        chatFab.querySelector('#chatFabIcon').className = 'fas fa-comments';
+    });
 }
 
 
@@ -256,16 +303,16 @@ function requestLocation() {
             // GPS Success
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
-            
+
             appState.location = {
                 lat: lat,
                 lon: lon
             };
-            
+
 
             locationStatus.innerHTML = `✅ Location detected automatically<br><span class="text-xs opacity-70">Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}</span>`;
             locationStatus.classList.add("text-green-600");
-            
+
             console.log("GPS location obtained:", appState.location);
             checkAnalyseButtonState();
         },
@@ -273,7 +320,7 @@ function requestLocation() {
             // GPS Failed
             console.log("GPS error:", error.message);
             let errorMsg = "📍 Location permission denied. Please enter manually.";
-            
+
             if (error.code === error.PERMISSION_DENIED) {
                 errorMsg = "📍 Location permission denied. Please enter manually.";
             } else if (error.code === error.POSITION_UNAVAILABLE) {
@@ -281,7 +328,7 @@ function requestLocation() {
             } else if (error.code === error.TIMEOUT) {
                 errorMsg = "📍 Location request timed out. Please enter manually.";
             }
-            
+
             showManualLocationInputs(errorMsg);
         },
         {
@@ -296,7 +343,7 @@ function showManualLocationInputs(message) {
     locationStatus.textContent = message;
     locationStatus.classList.add("text-orange-600");
     manualLocationInputs.classList.remove("hidden");
-    
+
     // Smooth scroll to location section
     setTimeout(() => {
         locationSection.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -305,7 +352,7 @@ function showManualLocationInputs(message) {
 
 function handleManualLocation() {
     const state = stateInput.value.trim();
-const district = districtInput.value.trim();
+    const district = districtInput.value.trim();
 
 
     if (!state || !district) {
@@ -329,10 +376,10 @@ const district = districtInput.value.trim();
     locationStatus.classList.add("text-green-600");
 
     // Hide manual inputs after confirmation
-    
-manualLocationInputs.classList.add("hidden");
 
-checkAnalyseButtonState();
+    manualLocationInputs.classList.add("hidden");
+
+    checkAnalyseButtonState();
 
 
     console.log("Manual location set:", appState.location);
@@ -360,7 +407,7 @@ function checkManualLocationComplete() {
 // ================== IMAGE HANDLING ==================
 function handleImageUpload(event) {
     const file = event.target.files[0];
-    
+
     if (!file) {
         console.log("No file selected");
         return;
@@ -380,7 +427,7 @@ function handleImageUpload(event) {
     }
 
     appState.imageFile = file;
-    
+
     // Create image preview
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -388,20 +435,20 @@ function handleImageUpload(event) {
         previewImg.src = e.target.result;
         imagePreview.classList.remove("hidden");
         imageBtn.classList.add("opacity-50");
-        
+
         // Update status text
         imageStatusText.innerHTML = '✅ <span class="text-green-600">Photo Uploaded</span>';
         imageFileName.textContent = `📷 ${file.name}`;
         imageFileName.classList.remove("hidden");
-        
+
         console.log("Image uploaded:", file.name);
         checkAnalyseButtonState();
     };
-    
+
     reader.onerror = () => {
         alert("⚠️ Error reading image file. Please try again.");
     };
-    
+
     reader.readAsDataURL(file);
 }
 
@@ -418,7 +465,7 @@ function checkAnalyseButtonState() {
         analyseBtn.classList.remove("bg-gray-300", "text-gray-500", "cursor-not-allowed");
         analyseBtn.classList.add("bg-cow-dung-green", "text-white", "hover:bg-cow-dung-light", "cursor-pointer");
         analyseBtnText.textContent = "Analyse Soil Health";
-        
+
         // Smooth scroll to analyse button
         setTimeout(() => {
             analyseBtn.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -428,7 +475,7 @@ function checkAnalyseButtonState() {
         analyseBtn.disabled = true;
         analyseBtn.classList.add("bg-gray-300", "text-gray-500", "cursor-not-allowed");
         analyseBtn.classList.remove("bg-cow-dung-green", "text-white", "hover:bg-cow-dung-light", "cursor-pointer");
-        
+
         if (!hasImage && !hasLocation) {
             analyseBtnText.textContent = "Upload image & set location first";
         } else if (!hasImage) {
@@ -441,7 +488,7 @@ function checkAnalyseButtonState() {
 
 // ================== ANALYSE FUNCTIONALITY ==================
 async function handleAnalyse() {
-    
+
 
     if (!appState.location || !appState.imageFile) {
         alert("⚠️ Please upload an image and set location before analyzing.");
@@ -457,25 +504,26 @@ async function handleAnalyse() {
     loadingSpinner.classList.remove("hidden");
     analyseBtn.disabled = true;
     const analyseBtnIcon = document.getElementById('analyseBtnIcon');
-analyseBtnText.textContent = "Analyzing...";
-analyseBtnIcon.className = "fas fa-spinner fa-spin";
+    analyseBtnText.textContent = "Analyzing...";
+    analyseBtnIcon.className = "fas fa-spinner fa-spin";
 
     // Scroll to loading spinner
     setTimeout(() => {
         loadingSpinner.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 100);
 
-    // ✅ UPDATED: Prepare form data to match backend requirements
+    // Prepare form data to match backend requirements
     const formData = new FormData();
-    formData.append("file", appState.imageFile);  // ✅ Changed from "image" to "file"
-    formData.append("lat", appState.location.lat.toString());  // ✅ Separate lat field
-    formData.append("lon", appState.location.lon.toString());  // ✅ Separate lon field
-    const landSizeValue = landSizeInput?.value;
-const landSize = landSizeValue && Number(landSizeValue) > 0
-    ? landSizeValue
-    : "1";
+    formData.append("file", appState.imageFile);
+    formData.append("lat", appState.location.lat.toString());
+    formData.append("lon", appState.location.lon.toString());
 
-formData.append("land_size", landSize);
+    // Backend always expects acres
+    let landSizeVal = parseFloat(landSizeInput?.value) || 1;
+    if (currentUnit === 'hectares') {
+        landSizeVal = landSizeVal / 0.4047; // convert hectares to acres for backend
+    }
+    formData.append("land_size", landSizeVal.toString());
 
     console.log("Sending request with:");
     console.log("- file:", appState.imageFile.name);
@@ -505,42 +553,45 @@ formData.append("land_size", landSize);
         }
 
         // Store result
-       const normalizedResult = {
-    soil_type: data.soil,
-    location: data.location,
-    recommended_crop: data.optimal_crop?.crop || "N/A",
-    suitability: data.optimal_crop?.suitability,
-    revenue: data.optimal_crop?.revenue,
-    top_3_crops: data.recommendations
-        ? data.recommendations.slice(0, 3).map(r => r.crop)
-        : [],
-    full_table: data.recommendations || [],
-    scatter_graph: data.scatter_graph || []
-};
+        const normalizedResult = {
+            soil_type: data.soil,
+            location: data.location,
+            recommended_crop: data.optimal_crop?.crop || "N/A",
+            suitability: data.optimal_crop?.suitability,
+            revenue: data.optimal_crop?.revenue,
+            top_3_crops: data.recommendations
+                ? data.recommendations.slice(0, 3).map(r => r.crop)
+                : [],
+            full_table: data.recommendations || [],
+            scatter_graph: data.scatter_graph || []
+        };
 
-appState.result = normalizedResult;
-// Display optimal crop hero section
+        appState.result = normalizedResult;
+        // Display optimal crop hero section
         displayOptimalCrop(normalizedResult);
-renderSummary(normalizedResult);
-renderCropTable(normalizedResult.full_table);
-renderScatterChart(normalizedResult.scatter_graph);
+        renderSummary(normalizedResult);
+        renderCropTable(normalizedResult.full_table);
+        renderScatterChart(normalizedResult.scatter_graph);
 
 
 
 
         // Hide loading, show results
         loadingSpinner.classList.add("hidden");
-        
+
         summarySection.classList.remove("hidden");
         // Update button to show completion
         analyseBtnText.textContent = "✓ Analysis Complete";
         analyseBtnIcon.className = "fas fa-check-circle";
         analyseBtn.classList.remove('bg-cow-dung-green');
         analyseBtn.classList.add('bg-green-600');
-        
-        // Show chatbot section
-        const chatbotSection = document.getElementById('chatbotSection');
-        if (chatbotSection) chatbotSection.classList.remove('hidden');
+
+        // Show chatbot FAB
+        const chatFab = document.getElementById('chatFab');
+        if (chatFab) {
+            chatFab.classList.remove('hidden');
+            document.getElementById('chatBadge')?.classList.remove('hidden');
+        }
 
         // Scroll to summary
         setTimeout(() => {
@@ -549,16 +600,16 @@ renderScatterChart(normalizedResult.scatter_graph);
 
     } catch (error) {
         console.error("Analysis error:", error);
-        
+
         loadingSpinner.classList.add("hidden");
-        
+
         alert(`❌ Analysis failed: ${error.message}\n\nPossible reasons:\n• API server is down or sleeping\n• Network connectivity issues\n• Invalid response from server\n\nPlease try again in a moment.`);
-        
+
         // Re-enable analyse button
         analyseBtn.disabled = false;
-analyseBtnText.textContent = "Analyse Soil Health";
-analyseBtnIcon.className = "fas fa-brain";
-checkAnalyseButtonState();
+        analyseBtnText.textContent = "Analyse Soil Health";
+        analyseBtnIcon.className = "fas fa-brain";
+        checkAnalyseButtonState();
     }
 }
 
@@ -566,7 +617,10 @@ checkAnalyseButtonState();
 function renderSummary(summary) {
     console.log("Rendering summary:", summary);
 
-    // Create formatted HTML for summary
+    const unitLabel = currentUnit;
+    const landVal = parseFloat(landSizeInput?.value) || 1;
+
+    // Create formatted HTML for summary — NO top-3 list (already in the table)
     let summaryHTML = `
         <div class="space-y-4">
             <div class="border-b border-gray-200 pb-3">
@@ -576,22 +630,21 @@ function renderSummary(summary) {
 
             <div class="border-b border-gray-200 pb-3">
                 <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">Season Context</h4>
-<p class="text-sm text-gray-500">
-    Seasonal and weather factors were considered internally by the AI.
-</p>
-
+                <p class="text-sm text-gray-500">Seasonal and weather factors were considered internally by the AI.</p>
             </div>
 
             <div class="border-b border-gray-200 pb-3">
-                <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">Crop Recommendations</h4>
-                <p class="text-lg text-cow-dung-green font-bold mb-2">🌾 Recommended: ${summary.recommended_crop || 'N/A'}</p>
-                <p class="font-semibold mb-1">Top 3 Suitable Crops:</p>
-                <ul class="list-disc list-inside ml-4 space-y-1">
-                    ${summary.top_3_crops ? summary.top_3_crops.map(crop => `<li>${crop}</li>`).join('') : '<li>No data available</li>'}
-                </ul>
+                <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">Best Crop Recommendation</h4>
+                <p class="text-lg text-cow-dung-green font-bold mb-1">🌾 Recommended: ${summary.recommended_crop || 'N/A'}</p>
+                <p class="text-sm text-gray-500">See the full comparison table below for all crop options.</p>
             </div>
 
-            
+            <div>
+                <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">Farm Details</h4>
+                <p class="text-sm"><span class="font-semibold">Location:</span> ${summary.location || 'N/A'}</p>
+                <p class="text-sm"><span class="font-semibold">Land Size:</span> ${landVal} ${unitLabel}</p>
+            </div>
+        </div>
     `;
 
     summaryText.innerHTML = summaryHTML;
@@ -600,24 +653,29 @@ function renderSummary(summary) {
 function displayOptimalCrop(result) {
     const landSize = parseFloat(landSizeInput?.value) || 1;
     const optimalCropSection = document.getElementById('optimalCropSection');
-    
+
     if (!optimalCropSection) return;
-    
-    document.getElementById('optimalCropName').textContent = 
+
+    document.getElementById('optimalCropName').textContent =
         result.recommended_crop.charAt(0).toUpperCase() + result.recommended_crop.slice(1);
-    
-    document.getElementById('optimalRevenue').textContent = 
+
+    document.getElementById('optimalRevenue').textContent =
         `₹${result.revenue?.toLocaleString('en-IN') || '0'}`;
-    
-    document.getElementById('optimalSuitability').textContent = 
+
+    document.getElementById('optimalSuitability').textContent =
         `${result.suitability || 0}%`;
-    
-    document.getElementById('optimalYield').textContent = 
+
+    document.getElementById('optimalYield').textContent =
         result.full_table[0]?.yield_ton || '0';
-    
+
     document.getElementById('optimalLandSize').textContent = landSize.toFixed(1);
     document.getElementById('optimalLandSize2').textContent = landSize.toFixed(1);
-    
+
+    // Update unit labels
+    document.querySelectorAll('.land-unit-label').forEach(el => {
+        el.textContent = currentUnit;
+    });
+
     optimalCropSection.classList.remove('hidden');
 }
 function renderCropTable(rows) {
@@ -697,8 +755,8 @@ function renderScatterChart(points) {
             },
             scales: {
                 x: {
-                    title: { 
-                        display: true, 
+                    title: {
+                        display: true,
                         text: "Suitability Score (%)",
                         font: { size: 14, weight: 'bold' },
                         color: '#4A5D23'
@@ -710,14 +768,14 @@ function renderScatterChart(points) {
                         drawBorder: false
                     },
                     ticks: {
-                        callback: function(value) {
+                        callback: function (value) {
                             return value + '%';
                         }
                     }
                 },
                 y: {
-                    title: { 
-                        display: true, 
+                    title: {
+                        display: true,
                         text: "Projected Revenue (₹)",
                         font: { size: 14, weight: 'bold' },
                         color: '#4A5D23'
@@ -728,7 +786,7 @@ function renderScatterChart(points) {
                         drawBorder: false
                     },
                     ticks: {
-                        callback: function(value) {
+                        callback: function (value) {
                             return '₹' + value.toLocaleString('en-IN');
                         }
                     }
@@ -757,16 +815,16 @@ async function handleDownloadPDF() {
     try {
         // Create PDF content
         const pdfContent = generatePDFContent();
-        
+
         // Create a simple HTML-based PDF using print
         const printWindow = window.open('', '', 'height=800,width=800');
         printWindow.document.write(pdfContent);
         printWindow.document.close();
-        
+
         // Wait for content to load
         setTimeout(() => {
             printWindow.print();
-            
+
             // Reset button
             downloadBtn.innerHTML = originalHTML;
             downloadBtn.disabled = false;
@@ -775,30 +833,110 @@ async function handleDownloadPDF() {
     } catch (error) {
         console.error("PDF generation error:", error);
         alert("❌ Failed to generate PDF. Please try again.");
-        
+
         downloadBtn.innerHTML = originalHTML;
         downloadBtn.disabled = false;
     }
 }
 document.addEventListener("click", (e) => {
     if (!stateInput.contains(e.target) && !stateDropdown.contains(e.target)) {
-    stateDropdown.classList.add("hidden");
-}
-if (!districtInput.contains(e.target) && !districtDropdown.contains(e.target)) {
-    districtDropdown.classList.add("hidden");
-}
+        stateDropdown.classList.add("hidden");
+    }
+    if (!districtInput.contains(e.target) && !districtDropdown.contains(e.target)) {
+        districtDropdown.classList.add("hidden");
+    }
 
 });
 // ================== CHATBOT FUNCTIONALITY ==================
 let chatThreadId = null;
 
+// ================== FORMAT CHAT MESSAGE (Markdown → HTML) ==================
+function formatChatMessage(text) {
+    if (!text) return '<p class="text-sm text-gray-700">No response.</p>';
+
+    // Escape HTML entities to prevent injection
+    let safe = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+    // Split into lines for processing
+    let lines = safe.split('\n');
+    let html = '';
+    let inUl = false;
+    let inOl = false;
+
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+
+        // Heading lines: ### / ## / #
+        if (/^###\s+(.+)/.test(line)) {
+            if (inUl) { html += '</ul>'; inUl = false; }
+            if (inOl) { html += '</ol>'; inOl = false; }
+            html += `<h5 class="font-bold text-gray-800 mt-3 mb-1 text-sm">${line.replace(/^###\s+/, '')}</h5>`;
+            continue;
+        }
+        if (/^##\s+(.+)/.test(line)) {
+            if (inUl) { html += '</ul>'; inUl = false; }
+            if (inOl) { html += '</ol>'; inOl = false; }
+            html += `<h4 class="font-bold text-gray-800 mt-3 mb-1">${line.replace(/^##\s+/, '')}</h4>`;
+            continue;
+        }
+        if (/^#\s+(.+)/.test(line)) {
+            if (inUl) { html += '</ul>'; inUl = false; }
+            if (inOl) { html += '</ol>'; inOl = false; }
+            html += `<h4 class="font-bold text-cow-dung-green mt-3 mb-1">${line.replace(/^#\s+/, '')}</h4>`;
+            continue;
+        }
+
+        // Bullet list: - item or * item
+        if (/^\s*[-*]\s+(.+)/.test(line)) {
+            if (inOl) { html += '</ol>'; inOl = false; }
+            if (!inUl) { html += '<ul class="list-disc list-inside ml-2 my-1 text-sm text-gray-700 space-y-0.5">'; inUl = true; }
+            html += `<li>${line.replace(/^\s*[-*]\s+/, '')}</li>`;
+            continue;
+        }
+
+        // Numbered list: 1. item
+        if (/^\s*\d+\.\s+(.+)/.test(line)) {
+            if (inUl) { html += '</ul>'; inUl = false; }
+            if (!inOl) { html += '<ol class="list-decimal list-inside ml-2 my-1 text-sm text-gray-700 space-y-0.5">'; inOl = true; }
+            html += `<li>${line.replace(/^\s*\d+\.\s+/, '')}</li>`;
+            continue;
+        }
+
+        // Close open lists if we hit a non-list line
+        if (inUl) { html += '</ul>'; inUl = false; }
+        if (inOl) { html += '</ol>'; inOl = false; }
+
+        // Empty line = paragraph break
+        if (line.trim() === '') {
+            html += '<div class="h-2"></div>';
+            continue;
+        }
+
+        // Normal text line
+        html += `<p class="text-sm text-gray-700 my-0.5">${line}</p>`;
+    }
+
+    // Close any remaining open lists
+    if (inUl) html += '</ul>';
+    if (inOl) html += '</ol>';
+
+    // Inline formatting: **bold**, *italic*
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+    return html;
+}
+
 async function sendChatMessage() {
     const input = document.getElementById('chatInput');
     const chatMessages = document.getElementById('chatMessages');
     const question = input.value.trim();
-    
+
     if (!question) return;
-    
+
     // Add user message to chat
     const userMsgDiv = document.createElement('div');
     userMsgDiv.className = 'flex gap-3 mb-4 justify-end';
@@ -812,7 +950,7 @@ async function sendChatMessage() {
     `;
     chatMessages.appendChild(userMsgDiv);
     input.value = '';
-    
+
     // Add "thinking" message
     const thinkingDiv = document.createElement('div');
     thinkingDiv.className = 'flex gap-3 mb-4';
@@ -827,12 +965,12 @@ async function sendChatMessage() {
     `;
     chatMessages.appendChild(thinkingDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
-    
+
     // Prepare context from analysis
-    const context = appState.result ? 
-        `Soil: ${appState.result.soil_type} in ${appState.result.location}. Best Crop: ${appState.result.recommended_crop} (Suitability: ${appState.result.suitability}%, Revenue: ₹${appState.result.revenue}). Alternatives: ${appState.result.top_3_crops.join(", ")}.` 
+    const context = appState.result ?
+        `Soil: ${appState.result.soil_type} in ${appState.result.location}. Best Crop: ${appState.result.recommended_crop} (Suitability: ${appState.result.suitability}%, Revenue: ₹${appState.result.revenue}). Alternatives: ${appState.result.top_3_crops.join(", ")}.`
         : "No analysis data available yet.";
-    
+
     try {
         const response = await fetch('https://nirmalll17-devsoc.hf.space/chat', {
             method: 'POST',
@@ -843,36 +981,36 @@ async function sendChatMessage() {
                 thread_id: chatThreadId
             })
         });
-        
+
         const data = await response.json();
-        
+
         // Remove thinking message
         document.getElementById('thinkingMessage')?.remove();
-        
+
         if (data.reply) {
             // Save thread ID for conversation continuity
             if (data.thread_id) chatThreadId = data.thread_id;
-            
-            // Add bot response
+
+            // Add bot response with formatted markdown
             const botMsgDiv = document.createElement('div');
             botMsgDiv.className = 'flex gap-3 mb-4';
             botMsgDiv.innerHTML = `
                 <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs flex-shrink-0">
                     <i class="fas fa-robot"></i>
                 </div>
-                <div class="bg-white p-3 rounded-xl shadow-sm max-w-md">
-                    <p class="text-sm text-gray-700">${data.reply}</p>
+                <div class="bg-white p-3 rounded-xl shadow-sm max-w-md chat-message-content">
+                    ${formatChatMessage(data.reply)}
                 </div>
             `;
             chatMessages.appendChild(botMsgDiv);
         } else {
             throw new Error('No reply from AI');
         }
-        
+
     } catch (error) {
         console.error('Chat error:', error);
         document.getElementById('thinkingMessage')?.remove();
-        
+
         const errorDiv = document.createElement('div');
         errorDiv.className = 'flex gap-3 mb-4';
         errorDiv.innerHTML = `
@@ -885,7 +1023,7 @@ async function sendChatMessage() {
         `;
         chatMessages.appendChild(errorDiv);
     }
-    
+
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 function generatePDFContent() {

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,11 +41,11 @@
             <i class="fas fa-leaf text-2xl"></i>
             <span class="text-xl font-bold tracking-tight">Growmore</span>
         </div>
-       <div class="hidden md:flex gap-6 text-sm font-bold text-cow-dung-green/80">
-    <button id="faqBtn" class="hover:text-cow-dung-green transition">
-        FAQ
-    </button>
-</div>
+        <div class="hidden md:flex gap-6 text-sm font-bold text-cow-dung-green/80">
+            <button id="faqBtn" class="hover:text-cow-dung-green transition">
+                FAQ
+            </button>
+        </div>
 
     </nav>
 
@@ -52,9 +53,10 @@
 
         <!-- HERO TITLE -->
         <section class="w-full text-center">
-            <div class="bg-cow-dung-green text-ivory-cream py-10 px-8 organic-bubble mx-auto relative overflow-hidden max-w-2xl flex flex-col justify-center items-center">
+            <div
+                class="bg-cow-dung-green text-ivory-cream py-10 px-8 organic-bubble mx-auto relative overflow-hidden max-w-2xl flex flex-col justify-center items-center">
                 <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none"
-                     style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px;">
+                    style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px;">
                 </div>
 
                 <h1 class="text-3xl md:text-5xl font-extrabold relative z-10 leading-tight">
@@ -76,15 +78,19 @@
                     <p class="text-xs text-gray-500">Enter your farm area</p>
                 </div>
             </div>
-            <input
-                type="number"
-                id="landSizeInput"
-                class="organic-input w-full"
-                placeholder="Enter land size in acres (e.g., 2.5)"
-                min="0.1"
-                step="0.1"
-                value="1"
-            />
+            <input type="number" id="landSizeInput" class="organic-input w-full"
+                placeholder="Enter land size in acres (e.g., 2.5)" min="0.1" step="0.1" value="1" />
+            <!-- Unit Toggle -->
+            <div class="flex items-center gap-2 mt-3">
+                <span class="text-xs text-gray-500 font-semibold">Unit:</span>
+                <div id="unitToggle"
+                    class="inline-flex rounded-lg border border-gray-300 overflow-hidden text-xs font-bold">
+                    <button type="button" data-unit="acres"
+                        class="unit-btn px-4 py-1.5 bg-cow-dung-green text-white transition-all">Acres</button>
+                    <button type="button" data-unit="hectares"
+                        class="unit-btn px-4 py-1.5 bg-white text-gray-600 hover:bg-gray-100 transition-all">Hectares</button>
+                </div>
+            </div>
             <p class="text-xs text-gray-400 mt-2">
                 💡 This helps calculate accurate yield and revenue estimates
             </p>
@@ -97,9 +103,10 @@
                     class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-cow-dung-light text-white text-4xl shadow-2xl flex items-center justify-center hover:bg-cow-dung-green hover:scale-105 transition-all duration-300 pulse-btn border-4 border-ivory-cream ring-4 ring-cow-dung-green/20">
                     <i class="fas fa-camera"></i>
                 </button>
-                
+
                 <!-- Image preview overlay -->
-                <div id="imagePreview" class="hidden absolute inset-0 w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-ivory-cream ring-4 ring-green-500/50">
+                <div id="imagePreview"
+                    class="hidden absolute inset-0 w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-ivory-cream ring-4 ring-green-500/50">
                     <img id="previewImg" src="" alt="Preview" class="w-full h-full object-cover">
                     <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
                         <i class="fas fa-check-circle text-white text-4xl"></i>
@@ -108,56 +115,81 @@
             </div>
 
             <!-- Hidden file input -->
-            <input
-                type="file"
-                id="imageInput"
-                accept="image/*"
-                class="hidden"
-            />
+            <input type="file" id="imageInput" accept="image/*" class="hidden" />
 
             <p class="text-cow-dung-green font-bold text-lg">
                 <span id="imageStatusText">2. Upload Soil Photo</span>
             </p>
-            
+
             <!-- Image name display -->
             <p id="imageFileName" class="text-sm text-gray-600 hidden"></p>
         </section>
 
         <!-- STEP 2: LOCATION -->
-       <!-- STEP 2: LOCATION -->
-<section id="locationSection" class="card w-full transition-all duration-300">
-    <div class="flex items-center justify-between mb-6">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-cow-dung-green/10 rounded-full flex items-center justify-center text-cow-dung-green">
-                <i class="fas fa-map-marker-alt"></i>
+        <!-- STEP 2: LOCATION -->
+        <section id="locationSection" class="card w-full transition-all duration-300">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 bg-cow-dung-green/10 rounded-full flex items-center justify-center text-cow-dung-green">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-cow-dung-green">
+                            3. Location Details
+                        </h3>
+                        <p id="locationStatus" class="text-xs text-gray-500 font-semibold">
+                            Detecting GPS...
+                        </p>
+                    </div>
+                </div>
             </div>
-            <div>
-                <h3 class="text-xl font-bold text-cow-dung-green">
-                    3. Location Details
-                </h3>
-                <p id="locationStatus"
-                   class="text-xs text-gray-500 font-semibold">
-                    Detecting GPS...
-                </p>
-            </div>
-        </div>
-    </div>
 
-    <!-- Manual location input (hidden by default, shown if GPS fails) -->
-    <div id="manualLocationInputs" class="hidden">
-        <div class="grid md:grid-cols-2 gap-6 mb-2">
-            <div class="input-group">
-                <label class="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">
-                    State
-                </label>
-                <div class="relative">
-    <!-- OPTIMAL CROP HERO SECTION -->
-        <section id="optimalCropSection" class="card w-full hidden bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-500">
+            <!-- Manual location input (hidden by default, shown if GPS fails) -->
+            <div id="manualLocationInputs" class="hidden">
+                <div class="grid md:grid-cols-2 gap-6 mb-2">
+                    <div class="input-group">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">
+                            State
+                        </label>
+                        <div class="relative">
+                            <input type="text" id="stateInput" class="organic-input" placeholder="Type state name"
+                                autocomplete="off" />
+                            <ul id="stateDropdown"
+                                class="absolute z-10 w-full bg-white border border-gray-200 rounded-xl mt-1 max-h-48 overflow-y-auto hidden">
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">
+                            District
+                        </label>
+                        <div class="relative">
+                            <input type="text" id="districtInput" class="organic-input" placeholder="Type district name"
+                                autocomplete="off" disabled />
+                            <ul id="districtDropdown"
+                                class="absolute z-10 w-full bg-white border border-gray-200 rounded-xl mt-1 max-h-48 overflow-y-auto hidden">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="confirmLocation"
+                    class="organic-btn bg-cow-dung-green text-white w-full py-3 font-bold mt-4 hover:bg-cow-dung-light">
+                    Confirm Location
+                </button>
+            </div>
+        </section>
+
+        <!-- OPTIMAL CROP HERO SECTION (shown after analysis) -->
+        <section id="optimalCropSection"
+            class="card w-full hidden bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-500">
             <div class="text-center">
                 <div class="inline-block bg-green-500 text-white px-4 py-2 rounded-full mb-4">
                     <i class="fas fa-trophy"></i> Most Optimal Crop
                 </div>
-                
+
                 <h2 id="optimalCropName" class="text-4xl md:text-5xl font-extrabold text-cow-dung-green mb-6">
                     Loading...
                 </h2>
@@ -166,9 +198,10 @@
                     <div class="bg-white p-6 rounded-xl shadow-sm">
                         <p class="text-sm text-gray-500 uppercase font-bold mb-2">Projected Revenue</p>
                         <p id="optimalRevenue" class="text-3xl font-bold text-green-600">₹0</p>
-                        <p class="text-xs text-gray-400 mt-2">Based on <span id="optimalLandSize">1.0</span> acres</p>
+                        <p class="text-xs text-gray-400 mt-2">Based on <span id="optimalLandSize">1.0</span> <span
+                                class="land-unit-label">acres</span></p>
                     </div>
-                    
+
                     <div class="bg-white p-6 rounded-xl shadow-sm">
                         <p class="text-sm text-gray-500 uppercase font-bold mb-2">Suitability Score</p>
                         <p id="optimalSuitability" class="text-3xl font-bold text-blue-600">0%</p>
@@ -179,51 +212,12 @@
                 <div class="mt-6 bg-amber-50 border-l-4 border-amber-500 p-4 rounded-lg">
                     <p class="text-sm text-gray-700">
                         <i class="fas fa-info-circle text-amber-500"></i>
-                        <strong>Expected Yield:</strong> <span id="optimalYield">0</span> tons from your <span id="optimalLandSize2">1.0</span> acre farm
+                        <strong>Expected Yield:</strong> <span id="optimalYield">0</span> tons from your <span
+                            id="optimalLandSize2">1.0</span> <span class="land-unit-label">acre</span> farm
                     </p>
                 </div>
             </div>
-        </section><input
-        type="text"
-        id="stateInput"
-        class="organic-input"
-        placeholder="Type state name"
-        autocomplete="off"
-    />
-    <ul id="stateDropdown"
-        class="absolute z-10 w-full bg-white border border-gray-200 rounded-xl mt-1 max-h-48 overflow-y-auto hidden">
-    </ul>
-</div>
-
-            </div>
-
-            <div class="input-group">
-                <label class="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">
-                    District
-                </label>
-                <div class="relative">
-    <input
-        type="text"
-        id="districtInput"
-        class="organic-input"
-        placeholder="Type district name"
-        autocomplete="off"
-        disabled
-    />
-    <ul id="districtDropdown"
-        class="absolute z-10 w-full bg-white border border-gray-200 rounded-xl mt-1 max-h-48 overflow-y-auto hidden">
-    </ul>
-</div>
-
-            </div>
-        </div>
-
-        <button id="confirmLocation"
-            class="organic-btn bg-cow-dung-green text-white w-full py-3 font-bold mt-4 hover:bg-cow-dung-light">
-            Confirm Location
-        </button>
-    </div>
-</section>
+        </section>
 
         <!-- STEP 3: ANALYSE -->
         <button id="analyseBtn" disabled
@@ -251,8 +245,8 @@
 
             <div class="bg-ivory-cream p-4 rounded-xl border border-cow-dung-green/10 mb-6">
                 <div id="summaryText" class="space-y-4 text-gray-700">
-    <!-- Filled dynamically by JS -->
-</div>
+                    <!-- Filled dynamically by JS -->
+                </div>
 
             </div>
 
@@ -261,113 +255,120 @@
                 <i class="fas fa-download"></i> Download Report as PDF
             </button>
             <!-- RECOMMENDATION TABLE -->
-<div id="tableSection" class="mt-6 hidden">
-    <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">
-        Crop Comparison
-    </h4>
+            <div id="tableSection" class="mt-6 hidden">
+                <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">
+                    Crop Comparison
+                </h4>
 
-    <div class="overflow-x-auto">
-        <table class="w-full border border-gray-200 rounded-lg text-sm">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="p-3 text-left">Crop</th>
-                    <th class="p-3">Suitability %</th>
-                    <th class="p-3">Yield (tons)</th>
-                    <th class="p-3">Revenue (₹)</th>
-                </tr>
-            </thead>
-            <tbody id="cropTableBody"></tbody>
-        </table>
-    </div>
-</div>
-
-<!-- SCATTER CHART -->
-<div id="chartSection" class="mt-8 hidden">
-    <h4 class="text-sm font-bold text-gray-500 uppercase mb-4">
-        Risk vs Reward Analysis
-    </h4>
-    <p class="text-xs text-gray-500 mb-3">
-        <strong>X-Axis:</strong> Suitability % (higher = better match) | 
-        <strong>Y-Axis:</strong> Revenue ₹ (higher = more profit)
-    </p>
-    <div class="bg-white p-4 rounded-xl border shadow-sm">
-        <canvas id="riskChart" height="280"></canvas>
-    </div>
-</div>
-
-        </section>
-        <!-- CHATBOT SECTION -->
-        <section id="chatbotSection" class="card w-full hidden">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
-                    <i class="fas fa-comments"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-800">
-                    Ask Agri-Expert AI
-                </h3>
-            </div>
-
-            <div class="bg-gray-50 rounded-xl border border-gray-200 p-4 mb-4 h-80 overflow-y-auto" id="chatMessages">
-                <div class="flex gap-3 mb-4">
-                    <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs flex-shrink-0">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl shadow-sm max-w-md">
-                        <p class="text-sm text-gray-700">
-                            I've analyzed your farm data. Ask me anything about the recommendations!
-                        </p>
-                    </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full border border-gray-200 rounded-lg text-sm">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-3 text-left">Crop</th>
+                                <th class="p-3">Suitability %</th>
+                                <th class="p-3">Yield (tons)</th>
+                                <th class="p-3">Revenue (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cropTableBody"></tbody>
+                    </table>
                 </div>
             </div>
 
-            <div class="flex gap-2">
-                <input
-                    type="text"
-                    id="chatInput"
-                    class="flex-1 organic-input"
-                    placeholder="Ask: Why did you recommend rice?"
-                    onkeypress="if(event.key==='Enter') sendChatMessage()"
-                />
-                <button
-                    onclick="sendChatMessage()"
-                    class="organic-btn bg-cow-dung-green text-white px-6 hover:bg-cow-dung-light">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
+            <!-- SCATTER CHART -->
+            <div id="chartSection" class="mt-8 hidden">
+                <h4 class="text-sm font-bold text-gray-500 uppercase mb-4">
+                    Risk vs Reward Analysis
+                </h4>
+                <p class="text-xs text-gray-500 mb-3">
+                    <strong>X-Axis:</strong> Suitability % (higher = better match) |
+                    <strong>Y-Axis:</strong> Revenue ₹ (higher = more profit)
+                </p>
+                <div class="bg-white p-4 rounded-xl border shadow-sm">
+                    <canvas id="riskChart" height="280"></canvas>
+                </div>
             </div>
+
         </section>
+        <!-- Chatbot is now a floating popup, see below -->
 
     </main>
-   
+
 
     <footer class="bg-cow-dung-green text-ivory-cream py-6 text-center mt-auto">
         <p class="text-sm opacity-70">
             &copy; 2025 Growmore
         </p>
     </footer>
-    <!-- FAQ MODAL -->
-<div id="faqModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-2xl p-6 max-w-lg w-full mx-4 shadow-2xl relative">
-        <h2 class="text-xl font-bold text-cow-dung-green mb-4">
-            Frequently Asked Questions
-        </h2>
 
-        <div class="space-y-3 text-sm text-gray-700">
-            <p><strong>How does soil analysis work?</strong><br>
-               We analyze the uploaded soil image using AI and combine it with weather and location data.</p>
+    <!-- FLOATING CHATBOT FAB + POPUP -->
+    <button id="chatFab" class="chat-fab hidden" title="Ask Agri-Expert AI">
+        <i class="fas fa-comments" id="chatFabIcon"></i>
+        <span id="chatBadge" class="chat-badge hidden">!</span>
+    </button>
 
-            <p><strong>Is location mandatory?</strong><br>
-               Yes. Location helps us understand climate and soil patterns accurately.</p>
-
-            <p><strong>Are recommendations guaranteed?</strong><br>
-               No. This is a decision-support tool, not a guarantee system.</p>
+    <div id="chatPopup" class="chat-popup hidden">
+        <div class="chat-popup-header">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white text-sm">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-white">Agri-Expert AI</h3>
+                    <p class="text-xs text-white/70">Ask about your recommendations</p>
+                </div>
+            </div>
+            <button id="chatClose" class="text-white/80 hover:text-white text-xl transition">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
 
-        <button id="closeFaq"
-            class="absolute top-3 right-3 text-gray-500 hover:text-gray-800">
-            <i class="fas fa-times"></i>
-        </button>
+        <div class="chat-popup-messages" id="chatMessages">
+            <div class="flex gap-3 mb-4">
+                <div
+                    class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs flex-shrink-0">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="bg-white p-3 rounded-xl shadow-sm max-w-[85%]">
+                    <p class="text-sm text-gray-700">
+                        I've analyzed your farm data. Ask me anything about the recommendations!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-popup-input">
+            <input type="text" id="chatInput" class="flex-1 organic-input text-sm"
+                placeholder="Ask: Why did you recommend rice?" onkeypress="if(event.key==='Enter') sendChatMessage()" />
+            <button onclick="sendChatMessage()"
+                class="organic-btn bg-cow-dung-green text-white px-4 hover:bg-cow-dung-light text-sm">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
     </div>
-</div>
+    <!-- FAQ MODAL -->
+    <div id="faqModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 max-w-lg w-full mx-4 shadow-2xl relative">
+            <h2 class="text-xl font-bold text-cow-dung-green mb-4">
+                Frequently Asked Questions
+            </h2>
+
+            <div class="space-y-3 text-sm text-gray-700">
+                <p><strong>How does soil analysis work?</strong><br>
+                    We analyze the uploaded soil image using AI and combine it with weather and location data.</p>
+
+                <p><strong>Is location mandatory?</strong><br>
+                    Yes. Location helps us understand climate and soil patterns accurately.</p>
+
+                <p><strong>Are recommendations guaranteed?</strong><br>
+                    No. This is a decision-support tool, not a guarantee system.</p>
+            </div>
+
+            <button id="closeFaq" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
 
 
 
@@ -375,4 +376,5 @@
     <script src="script.js"></script>
 
 </body>
+
 </html>
