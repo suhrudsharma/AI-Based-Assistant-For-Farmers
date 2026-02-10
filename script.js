@@ -54,14 +54,14 @@ const translations = {
     en: {
         heroTitle: 'Soil Doctor',
         heroSub: 'Upload soil image & check health',
-        landSizeTitle: '1. Land Size',
+        landSizeTitle: 'Land Size',
         landSizeSub: 'Enter your farm area',
         unitLabel: 'Unit:',
         acresBtn: 'Acres',
         hectaresBtn: 'Hectares',
-        landSizeTip: '💡 This helps calculate accurate yield and revenue estimates',
-        uploadTitle: '2. Upload Soil Photo',
-        locationTitle: '3. Location Details',
+        landSizeTip: 'This helps calculate accurate yield and revenue estimates',
+        uploadTitle: 'Upload Soil Photo',
+        locationTitle: 'Location Details',
         detectingGps: 'Detecting GPS...',
         stateLabel: 'State',
         districtLabel: 'District',
@@ -70,16 +70,16 @@ const translations = {
         confirmLocation: 'Confirm Location',
         analyseBtn: 'Analyse Soil Health',
         analysing: 'Analyzing...',
-        analysisComplete: '✓ Analysis Complete',
+        analysisComplete: 'Analysis Complete',
         loadingMsg: 'Analyzing soil and climate data...',
         fieldReport: 'Field Report',
         soilAnalysis: 'Soil Analysis',
         soilType: 'Soil Type:',
         weatherConditions: 'Weather & Season',
-        temperature: 'Temperature:',
-        humidity: 'Humidity:',
-        annualRainfall: 'Annual Rainfall:',
-        season: 'Season:',
+        temperature: 'Temperature',
+        humidity: 'Humidity',
+        annualRainfall: 'Annual Rainfall',
+        season: 'Season',
         bestCrop: 'Best Crop Recommendation',
         recommended: 'Recommended:',
         seeFullTable: 'See the full comparison table below for all crop options.',
@@ -93,12 +93,12 @@ const translations = {
         yieldCol: 'Yield (tons)',
         revenueCol: 'Revenue (₹)',
         riskReward: 'Risk vs Reward Analysis',
-        startOver: '🔄 Start New Analysis',
+        startOver: 'Start New Analysis',
         faqTitle: 'Frequently Asked Questions',
         chatTitle: 'Agri-Expert AI',
         chatSub: 'Ask about your recommendations',
         chatPlaceholder: 'Ask: Why did you recommend rice?',
-        photoUploaded: '✅ Photo Uploaded',
+        photoUploaded: 'Photo uploaded',
         optimalCropBadge: 'Most Optimal Crop',
         projectedRevenue: 'Projected Revenue',
         suitabilityScore: 'Suitability Score',
@@ -109,14 +109,14 @@ const translations = {
     hi: {
         heroTitle: 'मिट्टी डॉक्टर',
         heroSub: 'मिट्टी की तस्वीर अपलोड करें और स्वास्थ्य जांचें',
-        landSizeTitle: '1. भूमि का आकार',
+        landSizeTitle: 'भूमि का आकार',
         landSizeSub: 'अपने खेत का क्षेत्रफल दर्ज करें',
         unitLabel: 'इकाई:',
         acresBtn: 'एकड़',
         hectaresBtn: 'हेक्टेयर',
-        landSizeTip: '💡 यह सटीक उपज और राजस्व अनुमान की गणना में मदद करता है',
-        uploadTitle: '2. मिट्टी की तस्वीर अपलोड करें',
-        locationTitle: '3. स्थान विवरण',
+        landSizeTip: 'यह सटीक उपज और राजस्व अनुमान की गणना में मदद करता है',
+        uploadTitle: 'मिट्टी की तस्वीर अपलोड करें',
+        locationTitle: 'स्थान विवरण',
         detectingGps: 'GPS का पता लगा रहे हैं...',
         stateLabel: 'राज्य',
         districtLabel: 'जिला',
@@ -125,7 +125,7 @@ const translations = {
         confirmLocation: 'स्थान की पुष्टि करें',
         analyseBtn: 'मिट्टी स्वास्थ्य विश्लेषण',
         analysing: 'विश्लेषण हो रहा है...',
-        analysisComplete: '✓ विश्लेषण पूर्ण',
+        analysisComplete: 'विश्लेषण पूर्ण',
         loadingMsg: 'मिट्टी और जलवायु डेटा का विश्लेषण...',
         fieldReport: 'क्षेत्र रिपोर्ट',
         soilAnalysis: 'मिट्टी विश्लेषण',
@@ -148,12 +148,12 @@ const translations = {
         yieldCol: 'उपज (टन)',
         revenueCol: 'राजस्व (₹)',
         riskReward: 'जोखिम बनाम लाभ विश्लेषण',
-        startOver: '🔄 नया विश्लेषण शुरू करें',
+        startOver: 'नया विश्लेषण शुरू करें',
         faqTitle: 'अक्सर पूछे जाने वाले प्रश्न',
         chatTitle: 'कृषि-विशेषज्ञ AI',
         chatSub: 'अपनी सिफारिशों के बारे में पूछें',
         chatPlaceholder: 'पूछें: आपने चावल की सिफारिश क्यों की?',
-        photoUploaded: '✅ तस्वीर अपलोड हो गई',
+        photoUploaded: 'तस्वीर अपलोड हो गई',
         optimalCropBadge: 'सबसे उपयुक्त फसल',
         projectedRevenue: 'अनुमानित राजस्व',
         suitabilityScore: 'उपयुक्तता स्कोर',
@@ -165,6 +165,12 @@ const translations = {
 
 function t(key) {
     return translations[currentLang]?.[key] || translations['en'][key] || key;
+}
+
+// Title Case helper for crop names
+function toTitleCase(str) {
+    if (!str || str === 'N/A') return str;
+    return str.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
 function setLanguage(lang) {
@@ -448,6 +454,20 @@ function setupEventListeners() {
         });
     }
 
+    // ===== DETECT LOCATION BUTTON =====
+    const detectLocationBtn = document.getElementById('detectLocationBtn');
+    if (detectLocationBtn) {
+        detectLocationBtn.addEventListener('click', () => {
+            // Reset location state and try GPS again
+            locationStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Detecting GPS...';
+            locationStatus.classList.remove('text-orange-600', 'text-green-600');
+            locationStatus.classList.add('text-gray-500');
+            detectLocationBtn.classList.add('hidden');
+            manualLocationInputs.classList.add('hidden');
+            requestLocation();
+        });
+    }
+
     // ===== START OVER =====
     const startOverBtn = document.getElementById('startOverBtn');
     if (startOverBtn) {
@@ -477,8 +497,7 @@ function requestLocation() {
                 lon: lon
             };
 
-
-            locationStatus.innerHTML = `✅ Location detected automatically<br><span class="text-xs opacity-70">Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}</span>`;
+            locationStatus.innerHTML = `Location detected<br><span class="text-xs opacity-70">Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}</span>`;
             locationStatus.classList.add("text-green-600");
 
             console.log("GPS location obtained:", appState.location);
@@ -511,6 +530,9 @@ function showManualLocationInputs(message) {
     locationStatus.textContent = message;
     locationStatus.classList.add("text-orange-600");
     manualLocationInputs.classList.remove("hidden");
+    // Show detect location button
+    const detectBtn = document.getElementById('detectLocationBtn');
+    if (detectBtn) detectBtn.classList.remove('hidden');
 
     // Smooth scroll to location section
     setTimeout(() => {
@@ -539,13 +561,15 @@ function handleManualLocation() {
     };
     appState.locationMethod = 'manual';
 
-    locationStatus.innerHTML = `✅ Location set manually<br><span class="text-xs opacity-70">${district}, ${state}</span>`;
+    locationStatus.innerHTML = `Location set manually<br><span class="text-xs opacity-70">${district}, ${state}</span>`;
     locationStatus.classList.remove("text-orange-600");
     locationStatus.classList.add("text-green-600");
 
-    // Hide manual inputs after confirmation
+    // Hide manual inputs and detect button after confirmation
 
     manualLocationInputs.classList.add("hidden");
+    const detectBtn = document.getElementById('detectLocationBtn');
+    if (detectBtn) detectBtn.classList.add('hidden');
 
     checkAnalyseButtonState();
 
@@ -768,8 +792,8 @@ async function handleAnalyse() {
         // Update button to show completion
         analyseBtnText.textContent = "✓ Analysis Complete";
         analyseBtnIcon.className = "fas fa-check-circle";
-        analyseBtn.classList.remove('bg-cow-dung-green');
-        analyseBtn.classList.add('bg-green-600');
+        analyseBtn.classList.remove('bg-gray-300');
+        analyseBtn.classList.add('bg-cow-dung-green', 'text-white');
 
         // Show Start Over button
         document.getElementById('startOverBtn')?.classList.remove('hidden');
@@ -819,28 +843,28 @@ function renderSummary(summary) {
             <div class="border-b border-gray-200 pb-3">
                 <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">${t('weatherConditions')}</h4>
                 <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-blue-50 p-3 rounded-lg text-center">
-                        <p class="text-xs text-gray-500 font-bold uppercase">${t('temperature')}</p>
-                        <p class="text-lg font-bold text-blue-600">${summary.temperature !== 'N/A' ? summary.temperature + '°C' : 'N/A'}</p>
+                    <div style="background:#6B4226" class="p-3 rounded-lg text-center">
+                        <p class="text-xs font-bold uppercase" style="color:#FFFFF0">${t('temperature')}</p>
+                        <p class="text-lg font-bold" style="color:#FFFFF0">${summary.temperature !== 'N/A' ? summary.temperature + '°C' : 'N/A'}</p>
                     </div>
-                    <div class="bg-teal-50 p-3 rounded-lg text-center">
-                        <p class="text-xs text-gray-500 font-bold uppercase">${t('humidity')}</p>
-                        <p class="text-lg font-bold text-teal-600">${summary.humidity !== 'N/A' ? summary.humidity + '%' : 'N/A'}</p>
+                    <div style="background:#6B4226" class="p-3 rounded-lg text-center">
+                        <p class="text-xs font-bold uppercase" style="color:#FFFFF0">${t('humidity')}</p>
+                        <p class="text-lg font-bold" style="color:#FFFFF0">${summary.humidity !== 'N/A' ? summary.humidity + '%' : 'N/A'}</p>
                     </div>
-                    <div class="bg-indigo-50 p-3 rounded-lg text-center">
-                        <p class="text-xs text-gray-500 font-bold uppercase">${t('annualRainfall')}</p>
-                        <p class="text-lg font-bold text-indigo-600">${summary.annual_rainfall !== 'N/A' ? summary.annual_rainfall + ' mm' : 'N/A'}</p>
+                    <div style="background:#6B4226" class="p-3 rounded-lg text-center">
+                        <p class="text-xs font-bold uppercase" style="color:#FFFFF0">${t('annualRainfall')}</p>
+                        <p class="text-lg font-bold" style="color:#FFFFF0">${summary.annual_rainfall !== 'N/A' ? summary.annual_rainfall + ' mm' : 'N/A'}</p>
                     </div>
-                    <div class="bg-amber-50 p-3 rounded-lg text-center">
-                        <p class="text-xs text-gray-500 font-bold uppercase">${t('season')}</p>
-                        <p class="text-lg font-bold text-amber-600">${summary.season || 'N/A'}</p>
+                    <div style="background:#6B4226" class="p-3 rounded-lg text-center">
+                        <p class="text-xs font-bold uppercase" style="color:#FFFFF0">${t('season')}</p>
+                        <p class="text-lg font-bold" style="color:#FFFFF0">${summary.season || 'N/A'}</p>
                     </div>
                 </div>
             </div>
 
             <div class="border-b border-gray-200 pb-3">
                 <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">${t('bestCrop')}</h4>
-                <p class="text-lg text-cow-dung-green font-bold mb-1">🌾 ${t('recommended')} ${summary.recommended_crop || 'N/A'}</p>
+                <p class="text-lg text-cow-dung-green font-bold mb-1">${t('recommended')} ${toTitleCase(summary.recommended_crop || 'N/A')}</p>
                 <p class="text-sm text-gray-500">${t('seeFullTable')}</p>
             </div>
 
