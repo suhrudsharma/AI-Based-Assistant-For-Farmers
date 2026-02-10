@@ -12,6 +12,9 @@
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
+    <!-- html2pdf.js for PDF download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <!-- Link to Custom CSS -->
     <link rel="stylesheet" href="style.css">
 
@@ -41,12 +44,16 @@
             <i class="fas fa-leaf text-2xl"></i>
             <span class="text-xl font-bold tracking-tight">Growmore</span>
         </div>
-        <div class="hidden md:flex gap-6 text-sm font-bold text-cow-dung-green/80">
-            <button id="faqBtn" class="hover:text-cow-dung-green transition">
+        <div class="flex gap-4 items-center text-sm font-bold text-cow-dung-green/80">
+            <!-- Language Toggle -->
+            <button id="langToggleBtn"
+                class="lang-toggle-btn px-3 py-1.5 rounded-lg border-2 border-cow-dung-green text-cow-dung-green hover:bg-cow-dung-green hover:text-white transition-all text-xs font-bold">
+                हिंदी
+            </button>
+            <button id="faqBtn" class="hover:text-cow-dung-green transition" data-i18n="faqTitle">
                 FAQ
             </button>
         </div>
-
     </nav>
 
     <main class="flex-grow flex flex-col items-center w-full max-w-4xl mx-auto px-6 py-4 gap-8">
@@ -59,14 +66,15 @@
                     style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px;">
                 </div>
 
-                <h1 class="text-3xl md:text-5xl font-extrabold relative z-10 leading-tight">
+                <h1 class="text-3xl md:text-5xl font-extrabold relative z-10 leading-tight" data-i18n="heroTitle">
                     Soil Doctor
                 </h1>
-                <p class="text-ivory-cream/80 mt-2 font-medium relative z-10">
+                <p class="text-ivory-cream/80 mt-2 font-medium relative z-10" data-i18n="heroSub">
                     Upload soil image & check health
                 </p>
             </div>
         </section>
+
         <!-- STEP 1: LAND SIZE -->
         <section class="card w-full">
             <div class="flex items-center gap-3 mb-4">
@@ -74,29 +82,31 @@
                     <i class="fas fa-ruler-combined"></i>
                 </div>
                 <div>
-                    <h3 class="text-xl font-bold text-cow-dung-green">1. Land Size</h3>
-                    <p class="text-xs text-gray-500">Enter your farm area</p>
+                    <h3 class="text-xl font-bold text-cow-dung-green" data-i18n="landSizeTitle">1. Land Size</h3>
+                    <p class="text-xs text-gray-500" data-i18n="landSizeSub">Enter your farm area</p>
                 </div>
             </div>
             <input type="number" id="landSizeInput" class="organic-input w-full"
                 placeholder="Enter land size in acres (e.g., 2.5)" min="0.1" step="0.1" value="1" />
             <!-- Unit Toggle -->
             <div class="flex items-center gap-2 mt-3">
-                <span class="text-xs text-gray-500 font-semibold">Unit:</span>
+                <span class="text-xs text-gray-500 font-semibold" data-i18n="unitLabel">Unit:</span>
                 <div id="unitToggle"
                     class="inline-flex rounded-lg border border-gray-300 overflow-hidden text-xs font-bold">
                     <button type="button" data-unit="acres"
-                        class="unit-btn px-4 py-1.5 bg-cow-dung-green text-white transition-all">Acres</button>
+                        class="unit-btn px-4 py-1.5 bg-cow-dung-green text-white transition-all"
+                        data-i18n="acresBtn">Acres</button>
                     <button type="button" data-unit="hectares"
-                        class="unit-btn px-4 py-1.5 bg-white text-gray-600 hover:bg-gray-100 transition-all">Hectares</button>
+                        class="unit-btn px-4 py-1.5 bg-white text-gray-600 hover:bg-gray-100 transition-all"
+                        data-i18n="hectaresBtn">Hectares</button>
                 </div>
             </div>
-            <p class="text-xs text-gray-400 mt-2">
+            <p class="text-xs text-gray-400 mt-2" data-i18n="landSizeTip">
                 💡 This helps calculate accurate yield and revenue estimates
             </p>
         </section>
 
-        <!-- STEP 1: IMAGE UPLOAD -->
+        <!-- STEP 2: IMAGE UPLOAD -->
         <section class="w-full flex flex-col items-center gap-4">
             <div class="relative">
                 <button id="imageBtn"
@@ -118,15 +128,14 @@
             <input type="file" id="imageInput" accept="image/*" class="hidden" />
 
             <p class="text-cow-dung-green font-bold text-lg">
-                <span id="imageStatusText">2. Upload Soil Photo</span>
+                <span id="imageStatusText" data-i18n="uploadTitle">2. Upload Soil Photo</span>
             </p>
 
             <!-- Image name display -->
             <p id="imageFileName" class="text-sm text-gray-600 hidden"></p>
         </section>
 
-        <!-- STEP 2: LOCATION -->
-        <!-- STEP 2: LOCATION -->
+        <!-- STEP 3: LOCATION -->
         <section id="locationSection" class="card w-full transition-all duration-300">
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-3">
@@ -135,10 +144,10 @@
                         <i class="fas fa-map-marker-alt"></i>
                     </div>
                     <div>
-                        <h3 class="text-xl font-bold text-cow-dung-green">
+                        <h3 class="text-xl font-bold text-cow-dung-green" data-i18n="locationTitle">
                             3. Location Details
                         </h3>
-                        <p id="locationStatus" class="text-xs text-gray-500 font-semibold">
+                        <p id="locationStatus" class="text-xs text-gray-500 font-semibold" data-i18n="detectingGps">
                             Detecting GPS...
                         </p>
                     </div>
@@ -149,12 +158,12 @@
             <div id="manualLocationInputs" class="hidden">
                 <div class="grid md:grid-cols-2 gap-6 mb-2">
                     <div class="input-group">
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1" data-i18n="stateLabel">
                             State
                         </label>
                         <div class="relative">
-                            <input type="text" id="stateInput" class="organic-input" placeholder="Type state name"
-                                autocomplete="off" />
+                            <input type="text" id="stateInput" class="organic-input" data-i18n="statePlaceholder"
+                                placeholder="Type state name" autocomplete="off" />
                             <ul id="stateDropdown"
                                 class="absolute z-10 w-full bg-white border border-gray-200 rounded-xl mt-1 max-h-48 overflow-y-auto hidden">
                             </ul>
@@ -162,12 +171,13 @@
                     </div>
 
                     <div class="input-group">
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1"
+                            data-i18n="districtLabel">
                             District
                         </label>
                         <div class="relative">
-                            <input type="text" id="districtInput" class="organic-input" placeholder="Type district name"
-                                autocomplete="off" disabled />
+                            <input type="text" id="districtInput" class="organic-input" data-i18n="districtPlaceholder"
+                                placeholder="Type district name" autocomplete="off" disabled />
                             <ul id="districtDropdown"
                                 class="absolute z-10 w-full bg-white border border-gray-200 rounded-xl mt-1 max-h-48 overflow-y-auto hidden">
                             </ul>
@@ -176,18 +186,32 @@
                 </div>
 
                 <button id="confirmLocation"
-                    class="organic-btn bg-cow-dung-green text-white w-full py-3 font-bold mt-4 hover:bg-cow-dung-light">
+                    class="organic-btn bg-cow-dung-green text-white w-full py-3 font-bold mt-4 hover:bg-cow-dung-light"
+                    data-i18n="confirmLocation">
                     Confirm Location
                 </button>
             </div>
         </section>
+
+        <!-- STEP 4: ANALYSE -->
+        <button id="analyseBtn" disabled
+            class="w-full max-w-md organic-btn bg-gray-300 text-gray-500 py-4 text-xl font-bold flex items-center justify-center gap-3 cursor-not-allowed transition-all duration-300 shadow-sm">
+            <i class="fas fa-brain" id="analyseBtnIcon"></i>
+            <span id="analyseBtnText" data-i18n="analyseBtn">Analyse Soil Health</span>
+        </button>
+
+        <!-- LOADING SPINNER -->
+        <div id="loadingSpinner" class="hidden flex flex-col items-center gap-4">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-cow-dung-green"></div>
+            <p class="text-cow-dung-green font-semibold" data-i18n="loadingMsg">Analyzing soil and climate data...</p>
+        </div>
 
         <!-- OPTIMAL CROP HERO SECTION (shown after analysis) -->
         <section id="optimalCropSection"
             class="card w-full hidden bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-500">
             <div class="text-center">
                 <div class="inline-block bg-green-500 text-white px-4 py-2 rounded-full mb-4">
-                    <i class="fas fa-trophy"></i> Most Optimal Crop
+                    <i class="fas fa-trophy"></i> <span data-i18n="optimalCropBadge">Most Optimal Crop</span>
                 </div>
 
                 <h2 id="optimalCropName" class="text-4xl md:text-5xl font-extrabold text-cow-dung-green mb-6">
@@ -196,41 +220,31 @@
 
                 <div class="grid md:grid-cols-2 gap-6 max-w-xl mx-auto">
                     <div class="bg-white p-6 rounded-xl shadow-sm">
-                        <p class="text-sm text-gray-500 uppercase font-bold mb-2">Projected Revenue</p>
+                        <p class="text-sm text-gray-500 uppercase font-bold mb-2" data-i18n="projectedRevenue">
+                            Projected Revenue</p>
                         <p id="optimalRevenue" class="text-3xl font-bold text-green-600">₹0</p>
                         <p class="text-xs text-gray-400 mt-2">Based on <span id="optimalLandSize">1.0</span> <span
                                 class="land-unit-label">acres</span></p>
                     </div>
 
                     <div class="bg-white p-6 rounded-xl shadow-sm">
-                        <p class="text-sm text-gray-500 uppercase font-bold mb-2">Suitability Score</p>
+                        <p class="text-sm text-gray-500 uppercase font-bold mb-2" data-i18n="suitabilityScore">
+                            Suitability Score</p>
                         <p id="optimalSuitability" class="text-3xl font-bold text-blue-600">0%</p>
-                        <p class="text-xs text-gray-400 mt-2">Climate & soil match</p>
+                        <p class="text-xs text-gray-400 mt-2" data-i18n="climateMatch">Climate & soil match</p>
                     </div>
                 </div>
 
                 <div class="mt-6 bg-amber-50 border-l-4 border-amber-500 p-4 rounded-lg">
                     <p class="text-sm text-gray-700">
                         <i class="fas fa-info-circle text-amber-500"></i>
-                        <strong>Expected Yield:</strong> <span id="optimalYield">0</span> tons from your <span
-                            id="optimalLandSize2">1.0</span> <span class="land-unit-label">acre</span> farm
+                        <strong data-i18n="expectedYield">Expected Yield:</strong> <span id="optimalYield">0</span>
+                        tons from your <span id="optimalLandSize2">1.0</span> <span class="land-unit-label">acre</span>
+                        farm
                     </p>
                 </div>
             </div>
         </section>
-
-        <!-- STEP 3: ANALYSE -->
-        <button id="analyseBtn" disabled
-            class="w-full max-w-md organic-btn bg-gray-300 text-gray-500 py-4 text-xl font-bold flex items-center justify-center gap-3 cursor-not-allowed transition-all duration-300 shadow-sm">
-            <i class="fas fa-brain" id="analyseBtnIcon"></i>
-            <span id="analyseBtnText">Analyse Soil Health</span>
-        </button>
-
-        <!-- LOADING SPINNER -->
-        <div id="loadingSpinner" class="hidden flex flex-col items-center gap-4">
-            <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-cow-dung-green"></div>
-            <p class="text-cow-dung-green font-semibold">Analyzing soil and climate data...</p>
-        </div>
 
         <!-- SUMMARY SECTION -->
         <section id="summarySection" class="card w-full hidden">
@@ -238,7 +252,7 @@
                 <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center text-amber-600">
                     <i class="fas fa-file-alt"></i>
                 </div>
-                <h3 class="text-xl font-bold text-gray-800">
+                <h3 class="text-xl font-bold text-gray-800" data-i18n="fieldReport">
                     Field Report
                 </h3>
             </div>
@@ -247,16 +261,11 @@
                 <div id="summaryText" class="space-y-4 text-gray-700">
                     <!-- Filled dynamically by JS -->
                 </div>
-
             </div>
 
-            <button id="downloadBtn"
-                class="organic-btn border-2 border-cow-dung-green text-cow-dung-green w-full py-3 font-bold hover:bg-cow-dung-green hover:text-white flex justify-center items-center gap-2">
-                <i class="fas fa-download"></i> Download Report as PDF
-            </button>
             <!-- RECOMMENDATION TABLE -->
-            <div id="tableSection" class="mt-6 hidden">
-                <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">
+            <div id="tableSection" class="mt-2 hidden">
+                <h4 class="text-sm font-bold text-gray-500 uppercase mb-2" data-i18n="cropComparison">
                     Crop Comparison
                 </h4>
 
@@ -264,10 +273,10 @@
                     <table class="w-full border border-gray-200 rounded-lg text-sm">
                         <thead class="bg-gray-100">
                             <tr>
-                                <th class="p-3 text-left">Crop</th>
-                                <th class="p-3">Suitability %</th>
-                                <th class="p-3">Yield (tons)</th>
-                                <th class="p-3">Revenue (₹)</th>
+                                <th class="p-3 text-left" data-i18n="cropCol">Crop</th>
+                                <th class="p-3" data-i18n="suitabilityCol">Suitability %</th>
+                                <th class="p-3" data-i18n="yieldCol">Yield (tons)</th>
+                                <th class="p-3" data-i18n="revenueCol">Revenue (₹)</th>
                             </tr>
                         </thead>
                         <tbody id="cropTableBody"></tbody>
@@ -277,7 +286,7 @@
 
             <!-- SCATTER CHART -->
             <div id="chartSection" class="mt-8 hidden">
-                <h4 class="text-sm font-bold text-gray-500 uppercase mb-4">
+                <h4 class="text-sm font-bold text-gray-500 uppercase mb-4" data-i18n="riskReward">
                     Risk vs Reward Analysis
                 </h4>
                 <p class="text-xs text-gray-500 mb-3">
@@ -289,8 +298,19 @@
                 </div>
             </div>
 
+            <!-- DOWNLOAD REPORT (at bottom of analysis) -->
+            <button id="downloadBtn"
+                class="organic-btn border-2 border-cow-dung-green text-cow-dung-green w-full py-3 font-bold hover:bg-cow-dung-green hover:text-white flex justify-center items-center gap-2 mt-8">
+                <i class="fas fa-download"></i> <span data-i18n="downloadReport">Download Report as PDF</span>
+            </button>
+
         </section>
-        <!-- Chatbot is now a floating popup, see below -->
+
+        <!-- START OVER BUTTON -->
+        <button id="startOverBtn"
+            class="hidden w-full max-w-md organic-btn border-2 border-red-400 text-red-500 py-3 text-lg font-bold hover:bg-red-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span data-i18n="startOver">🔄 Start New Analysis</span>
+        </button>
 
     </main>
 
@@ -314,13 +334,18 @@
                     <i class="fas fa-robot"></i>
                 </div>
                 <div>
-                    <h3 class="text-sm font-bold text-white">Agri-Expert AI</h3>
-                    <p class="text-xs text-white/70">Ask about your recommendations</p>
+                    <h3 class="text-sm font-bold text-white" data-i18n="chatTitle">Agri-Expert AI</h3>
+                    <p class="text-xs text-white/70" data-i18n="chatSub">Ask about your recommendations</p>
                 </div>
             </div>
-            <button id="chatClose" class="text-white/80 hover:text-white text-xl transition">
-                <i class="fas fa-times"></i>
-            </button>
+            <div class="flex items-center gap-2">
+                <button id="chatExpand" class="text-white/80 hover:text-white text-lg transition" title="Fullscreen">
+                    <i class="fas fa-expand"></i>
+                </button>
+                <button id="chatClose" class="text-white/80 hover:text-white text-xl transition">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
         </div>
 
         <div class="chat-popup-messages" id="chatMessages">
@@ -338,7 +363,7 @@
         </div>
 
         <div class="chat-popup-input">
-            <input type="text" id="chatInput" class="flex-1 organic-input text-sm"
+            <input type="text" id="chatInput" class="flex-1 organic-input text-sm" data-i18n="chatPlaceholder"
                 placeholder="Ask: Why did you recommend rice?" onkeypress="if(event.key==='Enter') sendChatMessage()" />
             <button onclick="sendChatMessage()"
                 class="organic-btn bg-cow-dung-green text-white px-4 hover:bg-cow-dung-light text-sm">
@@ -346,22 +371,75 @@
             </button>
         </div>
     </div>
+
     <!-- FAQ MODAL -->
     <div id="faqModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-2xl p-6 max-w-lg w-full mx-4 shadow-2xl relative">
-            <h2 class="text-xl font-bold text-cow-dung-green mb-4">
+        <div class="bg-white rounded-2xl p-6 max-w-lg w-full mx-4 shadow-2xl relative max-h-[80vh] overflow-y-auto">
+            <h2 class="text-xl font-bold text-cow-dung-green mb-4" data-i18n="faqTitle">
                 Frequently Asked Questions
             </h2>
 
-            <div class="space-y-3 text-sm text-gray-700">
-                <p><strong>How does soil analysis work?</strong><br>
-                    We analyze the uploaded soil image using AI and combine it with weather and location data.</p>
+            <div class="space-y-4 text-sm text-gray-700">
+                <div>
+                    <p class="font-bold text-cow-dung-green">How does soil analysis work?</p>
+                    <p class="text-gray-600 mt-1">We analyze the uploaded soil image using AI and combine it with
+                        real-time weather and location data from Open-Meteo to recommend the best crops.</p>
+                </div>
 
-                <p><strong>Is location mandatory?</strong><br>
-                    Yes. Location helps us understand climate and soil patterns accurately.</p>
+                <div>
+                    <p class="font-bold text-cow-dung-green">Is location mandatory?</p>
+                    <p class="text-gray-600 mt-1">Yes. Location helps us fetch accurate climate data (temperature,
+                        humidity, rainfall) and understand regional soil patterns.</p>
+                </div>
 
-                <p><strong>Are recommendations guaranteed?</strong><br>
-                    No. This is a decision-support tool, not a guarantee system.</p>
+                <div>
+                    <p class="font-bold text-cow-dung-green">Are recommendations guaranteed?</p>
+                    <p class="text-gray-600 mt-1">No. This is a decision-support tool using AI models. Always verify
+                        results with local agricultural experts.</p>
+                </div>
+
+                <div>
+                    <p class="font-bold text-cow-dung-green">What weather data is used?</p>
+                    <p class="text-gray-600 mt-1">We fetch real-time temperature and humidity, plus the total rainfall
+                        from the last 365 days using the Open-Meteo API.</p>
+                </div>
+
+                <div>
+                    <p class="font-bold text-cow-dung-green">Can I switch between Acres and Hectares?</p>
+                    <p class="text-gray-600 mt-1">Yes! Use the unit toggle below the land size input. The value
+                        auto-converts when you switch, and all reports reflect your chosen unit.</p>
+                </div>
+
+                <div>
+                    <p class="font-bold text-cow-dung-green">How does the chatbot work?</p>
+                    <p class="text-gray-600 mt-1">After analysis, a chat icon appears at the bottom-right. Click it to
+                        ask follow-up questions about your crop recommendations. You can expand it to fullscreen.</p>
+                </div>
+
+                <div>
+                    <p class="font-bold text-cow-dung-green">Can I download my report?</p>
+                    <p class="text-gray-600 mt-1">Yes! After analysis, scroll to the bottom of the report section and
+                        click "Download Report as PDF". It saves a complete PDF file to your device.</p>
+                </div>
+
+                <div>
+                    <p class="font-bold text-cow-dung-green">Is Hindi language supported?</p>
+                    <p class="text-gray-600 mt-1">Yes. Use the language toggle button in the top navigation bar to
+                        switch between English and Hindi for all interface text.</p>
+                </div>
+
+                <div>
+                    <p class="font-bold text-cow-dung-green">How do I start a new analysis?</p>
+                    <p class="text-gray-600 mt-1">After an analysis is complete, a "Start New Analysis" button appears.
+                        Click it to reset everything and start fresh — no page refresh needed.</p>
+                </div>
+
+                <div>
+                    <p class="font-bold text-cow-dung-green">What crops does the system support?</p>
+                    <p class="text-gray-600 mt-1">The AI can recommend over 20 crops including rice, maize, cotton,
+                        wheat, lentils, various pulses, fruits (mango, banana, apple), and cash crops (coffee, jute,
+                        coconut).</p>
+                </div>
             </div>
 
             <button id="closeFaq" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800">

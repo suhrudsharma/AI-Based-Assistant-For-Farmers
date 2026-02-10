@@ -1,5 +1,5 @@
-html { 
-    scroll-behavior: smooth; 
+html {
+    scroll-behavior: smooth;
 }
 
 /* The Amoeba Bubble Shape */
@@ -8,6 +8,7 @@ html {
     box-shadow: 15px 20px 30px -5px rgba(74, 93, 35, 0.4);
     transition: all 1s ease-in-out;
 }
+
 .organic-bubble:hover {
     border-radius: 45% 55% 68% 32% / 48% 62% 38% 52%;
     transform: scale(1.01);
@@ -18,6 +19,7 @@ html {
     border-radius: 20px;
     transition: transform 0.2s, box-shadow 0.2s;
 }
+
 .organic-btn:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 10px 15px -3px rgba(74, 93, 35, 0.3);
@@ -56,6 +58,7 @@ button:disabled {
     transition: all 0.3s;
     font-size: 14px;
 }
+
 .organic-input:focus {
     border-color: #4A5D23;
     background-color: #fff;
@@ -70,10 +73,19 @@ button:disabled {
 
 /* Giant Image Button Pulse Animation */
 @keyframes pulse-green {
-    0% { box-shadow: 0 0 0 0 rgba(74, 93, 35, 0.4); }
-    70% { box-shadow: 0 0 0 20px rgba(74, 93, 35, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(74, 93, 35, 0); }
+    0% {
+        box-shadow: 0 0 0 0 rgba(74, 93, 35, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 20px rgba(74, 93, 35, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(74, 93, 35, 0);
+    }
 }
+
 .pulse-btn {
     animation: pulse-green 2s infinite;
 }
@@ -82,9 +94,11 @@ button:disabled {
 #imagePreview {
     transition: opacity 0.3s ease;
 }
+
 #imagePreview {
     transition: opacity 0.3s ease;
 }
+
 #imagePreview.hidden {
     display: none;
 }
@@ -99,7 +113,9 @@ button:disabled {
 
 /* Loading spinner animation */
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Input group styling */
@@ -122,7 +138,7 @@ button:disabled {
 }
 
 /* Ensure proper spacing for nested elements */
-.space-y-4 > * + * {
+.space-y-4>*+* {
     margin-top: 1rem;
 }
 
@@ -150,11 +166,11 @@ select.organic-input {
     .card {
         padding: 1.5rem;
     }
-    
+
     .organic-bubble {
         padding: 2rem 1.5rem !important;
     }
-    
+
     h1 {
         font-size: 2rem !important;
     }
@@ -165,11 +181,13 @@ select.organic-input {
     body {
         background: white;
     }
-    
-    nav, footer, .no-print {
+
+    nav,
+    footer,
+    .no-print {
         display: none !important;
     }
-    
+
     .card {
         box-shadow: none;
         border: 1px solid #ddd;
@@ -183,6 +201,7 @@ select.organic-input {
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -201,9 +220,11 @@ select.organic-input {
         transform: scale(0);
         opacity: 0;
     }
+
     50% {
         transform: scale(1.2);
     }
+
     100% {
         transform: scale(1);
         opacity: 1;
@@ -215,14 +236,33 @@ select.organic-input {
 }
 
 /* Nutrient box styling in summary */
-.bg-blue-50 { background-color: #eff6ff; }
-.bg-orange-50 { background-color: #fff7ed; }
-.bg-purple-50 { background-color: #faf5ff; }
-.bg-green-50 { background-color: #f0fdf4; }
+.bg-blue-50 {
+    background-color: #eff6ff;
+}
 
-.text-blue-600 { color: #2563eb; }
-.text-orange-600 { color: #ea580c; }
-.text-purple-600 { color: #9333ea; }
+.bg-orange-50 {
+    background-color: #fff7ed;
+}
+
+.bg-purple-50 {
+    background-color: #faf5ff;
+}
+
+.bg-green-50 {
+    background-color: #f0fdf4;
+}
+
+.text-blue-600 {
+    color: #2563eb;
+}
+
+.text-orange-600 {
+    color: #ea580c;
+}
+
+.text-purple-600 {
+    color: #9333ea;
+}
 
 /* Ensure icons are properly aligned */
 .fa {
@@ -267,10 +307,12 @@ select.organic-input {
     z-index: 1000;
     transition: transform 0.2s, background 0.2s;
 }
+
 .chat-fab:hover {
     transform: scale(1.1);
     background: #5C742C;
 }
+
 .chat-badge {
     position: absolute;
     top: -2px;
@@ -305,10 +347,19 @@ select.organic-input {
     overflow: hidden;
     animation: slideUp 0.3s ease-out;
 }
+
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
+
 .chat-popup-header {
     background: #4A5D23;
     padding: 14px 16px;
@@ -317,6 +368,7 @@ select.organic-input {
     justify-content: space-between;
     flex-shrink: 0;
 }
+
 .chat-popup-messages {
     flex: 1;
     overflow-y: auto;
@@ -325,6 +377,7 @@ select.organic-input {
     max-height: 340px;
     background: #f9fafb;
 }
+
 .chat-popup-input {
     display: flex;
     gap: 8px;
@@ -340,22 +393,27 @@ select.organic-input {
     margin-top: 0.5rem;
     margin-bottom: 0.25rem;
 }
+
 .chat-message-content h5 {
     font-size: 0.85rem;
     margin-top: 0.4rem;
     margin-bottom: 0.2rem;
 }
+
 .chat-message-content ul,
 .chat-message-content ol {
     margin: 0.25rem 0;
     padding-left: 1.25rem;
 }
+
 .chat-message-content li {
     margin: 2px 0;
 }
+
 .chat-message-content p {
     margin: 2px 0;
 }
+
 .chat-message-content strong {
     color: #374151;
 }
@@ -368,6 +426,7 @@ select.organic-input {
         width: calc(100vw - 16px);
         max-height: 70vh;
     }
+
     .chat-fab {
         bottom: 16px;
         right: 16px;
@@ -375,4 +434,32 @@ select.organic-input {
         height: 52px;
         font-size: 20px;
     }
+}
+
+/* ===== CHAT FULLSCREEN MODE ===== */
+.chat-popup.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 0;
+    z-index: 9999;
+    animation: none;
+}
+
+.chat-popup.fullscreen .chat-popup-messages {
+    min-height: unset;
+    max-height: unset;
+    flex: 1;
+}
+
+/* ===== LANGUAGE TOGGLE BUTTON ===== */
+.lang-toggle-btn {
+    min-width: 60px;
+    text-align: center;
+    letter-spacing: 0.5px;
 }

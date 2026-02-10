@@ -46,6 +46,142 @@ let appState = {
 
 let currentUnit = 'acres'; // 'acres' or 'hectares'
 let chatOpen = false;
+let chatFullscreen = false;
+let currentLang = 'en'; // 'en' or 'hi'
+
+// ================== LANGUAGE TRANSLATIONS ==================
+const translations = {
+    en: {
+        heroTitle: 'Soil Doctor',
+        heroSub: 'Upload soil image & check health',
+        landSizeTitle: '1. Land Size',
+        landSizeSub: 'Enter your farm area',
+        unitLabel: 'Unit:',
+        acresBtn: 'Acres',
+        hectaresBtn: 'Hectares',
+        landSizeTip: '💡 This helps calculate accurate yield and revenue estimates',
+        uploadTitle: '2. Upload Soil Photo',
+        locationTitle: '3. Location Details',
+        detectingGps: 'Detecting GPS...',
+        stateLabel: 'State',
+        districtLabel: 'District',
+        statePlaceholder: 'Type state name',
+        districtPlaceholder: 'Type district name',
+        confirmLocation: 'Confirm Location',
+        analyseBtn: 'Analyse Soil Health',
+        analysing: 'Analyzing...',
+        analysisComplete: '✓ Analysis Complete',
+        loadingMsg: 'Analyzing soil and climate data...',
+        fieldReport: 'Field Report',
+        soilAnalysis: 'Soil Analysis',
+        soilType: 'Soil Type:',
+        weatherConditions: 'Weather & Season',
+        temperature: 'Temperature:',
+        humidity: 'Humidity:',
+        annualRainfall: 'Annual Rainfall:',
+        season: 'Season:',
+        bestCrop: 'Best Crop Recommendation',
+        recommended: 'Recommended:',
+        seeFullTable: 'See the full comparison table below for all crop options.',
+        farmDetails: 'Farm Details',
+        locationLabel: 'Location:',
+        landSizeLabel: 'Land Size:',
+        downloadReport: 'Download Report as PDF',
+        cropComparison: 'Crop Comparison',
+        cropCol: 'Crop',
+        suitabilityCol: 'Suitability %',
+        yieldCol: 'Yield (tons)',
+        revenueCol: 'Revenue (₹)',
+        riskReward: 'Risk vs Reward Analysis',
+        startOver: '🔄 Start New Analysis',
+        faqTitle: 'Frequently Asked Questions',
+        chatTitle: 'Agri-Expert AI',
+        chatSub: 'Ask about your recommendations',
+        chatPlaceholder: 'Ask: Why did you recommend rice?',
+        photoUploaded: '✅ Photo Uploaded',
+        optimalCropBadge: 'Most Optimal Crop',
+        projectedRevenue: 'Projected Revenue',
+        suitabilityScore: 'Suitability Score',
+        climateMatch: 'Climate & soil match',
+        expectedYield: 'Expected Yield:',
+        langToggle: 'हिंदी'
+    },
+    hi: {
+        heroTitle: 'मिट्टी डॉक्टर',
+        heroSub: 'मिट्टी की तस्वीर अपलोड करें और स्वास्थ्य जांचें',
+        landSizeTitle: '1. भूमि का आकार',
+        landSizeSub: 'अपने खेत का क्षेत्रफल दर्ज करें',
+        unitLabel: 'इकाई:',
+        acresBtn: 'एकड़',
+        hectaresBtn: 'हेक्टेयर',
+        landSizeTip: '💡 यह सटीक उपज और राजस्व अनुमान की गणना में मदद करता है',
+        uploadTitle: '2. मिट्टी की तस्वीर अपलोड करें',
+        locationTitle: '3. स्थान विवरण',
+        detectingGps: 'GPS का पता लगा रहे हैं...',
+        stateLabel: 'राज्य',
+        districtLabel: 'जिला',
+        statePlaceholder: 'राज्य का नाम टाइप करें',
+        districtPlaceholder: 'जिले का नाम टाइप करें',
+        confirmLocation: 'स्थान की पुष्टि करें',
+        analyseBtn: 'मिट्टी स्वास्थ्य विश्लेषण',
+        analysing: 'विश्लेषण हो रहा है...',
+        analysisComplete: '✓ विश्लेषण पूर्ण',
+        loadingMsg: 'मिट्टी और जलवायु डेटा का विश्लेषण...',
+        fieldReport: 'क्षेत्र रिपोर्ट',
+        soilAnalysis: 'मिट्टी विश्लेषण',
+        soilType: 'मिट्टी का प्रकार:',
+        weatherConditions: 'मौसम और ऋतु',
+        temperature: 'तापमान:',
+        humidity: 'आर्द्रता:',
+        annualRainfall: 'वार्षिक वर्षा:',
+        season: 'ऋतु:',
+        bestCrop: 'सर्वश्रेष्ठ फसल सिफारिश',
+        recommended: 'अनुशंसित:',
+        seeFullTable: 'सभी फसल विकल्पों के लिए नीचे पूरी तुलना तालिका देखें।',
+        farmDetails: 'खेत विवरण',
+        locationLabel: 'स्थान:',
+        landSizeLabel: 'भूमि का आकार:',
+        downloadReport: 'रिपोर्ट PDF में डाउनलोड करें',
+        cropComparison: 'फसल तुलना',
+        cropCol: 'फसल',
+        suitabilityCol: 'उपयुक्तता %',
+        yieldCol: 'उपज (टन)',
+        revenueCol: 'राजस्व (₹)',
+        riskReward: 'जोखिम बनाम लाभ विश्लेषण',
+        startOver: '🔄 नया विश्लेषण शुरू करें',
+        faqTitle: 'अक्सर पूछे जाने वाले प्रश्न',
+        chatTitle: 'कृषि-विशेषज्ञ AI',
+        chatSub: 'अपनी सिफारिशों के बारे में पूछें',
+        chatPlaceholder: 'पूछें: आपने चावल की सिफारिश क्यों की?',
+        photoUploaded: '✅ तस्वीर अपलोड हो गई',
+        optimalCropBadge: 'सबसे उपयुक्त फसल',
+        projectedRevenue: 'अनुमानित राजस्व',
+        suitabilityScore: 'उपयुक्तता स्कोर',
+        climateMatch: 'जलवायु और मिट्टी मिलान',
+        expectedYield: 'अपेक्षित उपज:',
+        langToggle: 'English'
+    }
+};
+
+function t(key) {
+    return translations[currentLang]?.[key] || translations['en'][key] || key;
+}
+
+function setLanguage(lang) {
+    currentLang = lang;
+    // Update all elements with data-i18n attribute
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (el.tagName === 'INPUT') {
+            el.placeholder = t(key);
+        } else {
+            el.textContent = t(key);
+        }
+    });
+    // Update lang toggle button text
+    const langBtn = document.getElementById('langToggleBtn');
+    if (langBtn) langBtn.textContent = t('langToggle');
+}
 
 let statesData = {}; // Will hold the JSON data
 
@@ -285,6 +421,38 @@ function setupEventListeners() {
         chatPopup.classList.add('hidden');
         chatFab.querySelector('#chatFabIcon').className = 'fas fa-comments';
     });
+
+    // ===== CHAT FULLSCREEN TOGGLE =====
+    const chatExpand = document.getElementById('chatExpand');
+    if (chatExpand) {
+        chatExpand.addEventListener('click', () => {
+            chatFullscreen = !chatFullscreen;
+            if (chatFullscreen) {
+                chatPopup.classList.add('fullscreen');
+                chatExpand.innerHTML = '<i class="fas fa-compress"></i>';
+                chatExpand.title = 'Minimize';
+            } else {
+                chatPopup.classList.remove('fullscreen');
+                chatExpand.innerHTML = '<i class="fas fa-expand"></i>';
+                chatExpand.title = 'Fullscreen';
+            }
+        });
+    }
+
+    // ===== LANGUAGE TOGGLE =====
+    const langBtn = document.getElementById('langToggleBtn');
+    if (langBtn) {
+        langBtn.addEventListener('click', () => {
+            const newLang = currentLang === 'en' ? 'hi' : 'en';
+            setLanguage(newLang);
+        });
+    }
+
+    // ===== START OVER =====
+    const startOverBtn = document.getElementById('startOverBtn');
+    if (startOverBtn) {
+        startOverBtn.addEventListener('click', resetApp);
+    }
 }
 
 
@@ -525,6 +693,12 @@ async function handleAnalyse() {
     }
     formData.append("land_size", landSizeVal.toString());
 
+    // Fix 3: Send manual location state/district so backend uses them directly
+    if (appState.locationMethod === 'manual' && appState.location.state && appState.location.district) {
+        formData.append("state", appState.location.state);
+        formData.append("district", appState.location.district);
+    }
+
     console.log("Sending request with:");
     console.log("- file:", appState.imageFile.name);
     console.log("- lat:", appState.location.lat);
@@ -553,9 +727,15 @@ async function handleAnalyse() {
         }
 
         // Store result
+        // Fix 3: If manual location, override backend location with user input
+        let displayLocation = data.location;
+        if (appState.locationMethod === 'manual' && appState.location.state && appState.location.district) {
+            displayLocation = `${appState.location.district}, ${appState.location.state}`;
+        }
+
         const normalizedResult = {
             soil_type: data.soil,
-            location: data.location,
+            location: displayLocation,
             recommended_crop: data.optimal_crop?.crop || "N/A",
             suitability: data.optimal_crop?.suitability,
             revenue: data.optimal_crop?.revenue,
@@ -563,7 +743,12 @@ async function handleAnalyse() {
                 ? data.recommendations.slice(0, 3).map(r => r.crop)
                 : [],
             full_table: data.recommendations || [],
-            scatter_graph: data.scatter_graph || []
+            scatter_graph: data.scatter_graph || [],
+            // Fix 1: Store weather data from backend
+            season: data.season || 'N/A',
+            temperature: data.temperature ?? 'N/A',
+            humidity: data.humidity ?? 'N/A',
+            annual_rainfall: data.annual_rainfall ?? 'N/A'
         };
 
         appState.result = normalizedResult;
@@ -586,6 +771,9 @@ async function handleAnalyse() {
         analyseBtn.classList.remove('bg-cow-dung-green');
         analyseBtn.classList.add('bg-green-600');
 
+        // Show Start Over button
+        document.getElementById('startOverBtn')?.classList.remove('hidden');
+
         // Show chatbot FAB
         const chatFab = document.getElementById('chatFab');
         if (chatFab) {
@@ -593,9 +781,9 @@ async function handleAnalyse() {
             document.getElementById('chatBadge')?.classList.remove('hidden');
         }
 
-        // Scroll to summary
+        // Fix 2: Scroll to optimal crop section (above summary)
         setTimeout(() => {
-            summarySection.scrollIntoView({ behavior: "smooth", block: "start" });
+            document.getElementById('optimalCropSection')?.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 100);
 
     } catch (error) {
@@ -620,29 +808,46 @@ function renderSummary(summary) {
     const unitLabel = currentUnit;
     const landVal = parseFloat(landSizeInput?.value) || 1;
 
-    // Create formatted HTML for summary — NO top-3 list (already in the table)
+    // Fix 1: Show actual weather data from backend
     let summaryHTML = `
         <div class="space-y-4">
             <div class="border-b border-gray-200 pb-3">
-                <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">Soil Analysis</h4>
-                <p class="text-lg"><span class="font-semibold">Soil Type:</span> ${(summary.soil_type || 'N/A').replace(/_/g, ' ')}</p>
+                <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">${t('soilAnalysis')}</h4>
+                <p class="text-lg"><span class="font-semibold">${t('soilType')}</span> ${(summary.soil_type || 'N/A').replace(/_/g, ' ')}</p>
             </div>
 
             <div class="border-b border-gray-200 pb-3">
-                <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">Season Context</h4>
-                <p class="text-sm text-gray-500">Seasonal and weather factors were considered internally by the AI.</p>
+                <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">${t('weatherConditions')}</h4>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-blue-50 p-3 rounded-lg text-center">
+                        <p class="text-xs text-gray-500 font-bold uppercase">${t('temperature')}</p>
+                        <p class="text-lg font-bold text-blue-600">${summary.temperature !== 'N/A' ? summary.temperature + '°C' : 'N/A'}</p>
+                    </div>
+                    <div class="bg-teal-50 p-3 rounded-lg text-center">
+                        <p class="text-xs text-gray-500 font-bold uppercase">${t('humidity')}</p>
+                        <p class="text-lg font-bold text-teal-600">${summary.humidity !== 'N/A' ? summary.humidity + '%' : 'N/A'}</p>
+                    </div>
+                    <div class="bg-indigo-50 p-3 rounded-lg text-center">
+                        <p class="text-xs text-gray-500 font-bold uppercase">${t('annualRainfall')}</p>
+                        <p class="text-lg font-bold text-indigo-600">${summary.annual_rainfall !== 'N/A' ? summary.annual_rainfall + ' mm' : 'N/A'}</p>
+                    </div>
+                    <div class="bg-amber-50 p-3 rounded-lg text-center">
+                        <p class="text-xs text-gray-500 font-bold uppercase">${t('season')}</p>
+                        <p class="text-lg font-bold text-amber-600">${summary.season || 'N/A'}</p>
+                    </div>
+                </div>
             </div>
 
             <div class="border-b border-gray-200 pb-3">
-                <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">Best Crop Recommendation</h4>
-                <p class="text-lg text-cow-dung-green font-bold mb-1">🌾 Recommended: ${summary.recommended_crop || 'N/A'}</p>
-                <p class="text-sm text-gray-500">See the full comparison table below for all crop options.</p>
+                <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">${t('bestCrop')}</h4>
+                <p class="text-lg text-cow-dung-green font-bold mb-1">🌾 ${t('recommended')} ${summary.recommended_crop || 'N/A'}</p>
+                <p class="text-sm text-gray-500">${t('seeFullTable')}</p>
             </div>
 
             <div>
-                <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">Farm Details</h4>
-                <p class="text-sm"><span class="font-semibold">Location:</span> ${summary.location || 'N/A'}</p>
-                <p class="text-sm"><span class="font-semibold">Land Size:</span> ${landVal} ${unitLabel}</p>
+                <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">${t('farmDetails')}</h4>
+                <p class="text-sm"><span class="font-semibold">${t('locationLabel')}</span> ${summary.location || 'N/A'}</p>
+                <p class="text-sm"><span class="font-semibold">${t('landSizeLabel')}</span> ${landVal} ${unitLabel}</p>
             </div>
         </div>
     `;
@@ -798,7 +1003,7 @@ function renderScatterChart(points) {
     chartSection.classList.remove("hidden");
 }
 
-// ================== PDF DOWNLOAD ==================
+// ================== PDF DOWNLOAD (html2pdf.js) ==================
 async function handleDownloadPDF() {
     if (!appState.result) {
         alert("⚠️ No report available to download.");
@@ -807,33 +1012,35 @@ async function handleDownloadPDF() {
 
     console.log("Generating PDF...");
 
-    // Change button state
     const originalHTML = downloadBtn.innerHTML;
     downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
     downloadBtn.disabled = true;
 
     try {
-        // Create PDF content
-        const pdfContent = generatePDFContent();
+        // Build a hidden container with all analysis content
+        const pdfContainer = document.createElement('div');
+        pdfContainer.style.cssText = 'padding:30px;font-family:Arial,sans-serif;max-width:800px;background:white;';
+        pdfContainer.innerHTML = generatePDFContent();
 
-        // Create a simple HTML-based PDF using print
-        const printWindow = window.open('', '', 'height=800,width=800');
-        printWindow.document.write(pdfContent);
-        printWindow.document.close();
+        document.body.appendChild(pdfContainer);
 
-        // Wait for content to load
-        setTimeout(() => {
-            printWindow.print();
+        const opt = {
+            margin: 0.5,
+            filename: `Growmore_Report_${new Date().toISOString().slice(0, 10)}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
 
-            // Reset button
-            downloadBtn.innerHTML = originalHTML;
-            downloadBtn.disabled = false;
-        }, 500);
+        await html2pdf().set(opt).from(pdfContainer).save();
 
+        document.body.removeChild(pdfContainer);
+
+        downloadBtn.innerHTML = originalHTML;
+        downloadBtn.disabled = false;
     } catch (error) {
         console.error("PDF generation error:", error);
-        alert("❌ Failed to generate PDF. Please try again.");
-
+        alert("❌ PDF generation failed. Please try again.");
         downloadBtn.innerHTML = originalHTML;
         downloadBtn.disabled = false;
     }
@@ -1030,167 +1237,141 @@ function generatePDFContent() {
     const result = appState.result;
     const date = new Date().toLocaleDateString('en-IN');
     const time = new Date().toLocaleTimeString('en-IN');
+    const unitLabel = currentUnit;
+    const landVal = parseFloat(landSizeInput?.value) || 1;
+
+    // Build crop table rows
+    let tableRows = '';
+    if (result.full_table && result.full_table.length > 0) {
+        result.full_table.forEach((r, i) => {
+            tableRows += `
+                <tr style="${i % 2 === 0 ? 'background:#f9fafb;' : ''}">
+                    <td style="padding:10px;border:1px solid #e5e7eb;font-weight:600;">${r.crop}</td>
+                    <td style="padding:10px;border:1px solid #e5e7eb;text-align:center;">${r.suitability}%</td>
+                    <td style="padding:10px;border:1px solid #e5e7eb;text-align:center;">${r.yield_ton}</td>
+                    <td style="padding:10px;border:1px solid #e5e7eb;text-align:center;">₹${r.revenue?.toLocaleString('en-IN') || '0'}</td>
+                </tr>`;
+        });
+    }
 
     return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Soil Health Report</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    padding: 40px;
-                    max-width: 800px;
-                    margin: 0 auto;
-                    background: white;
-                }
-                .header {
-                    text-align: center;
-                    border-bottom: 3px solid #4A5D23;
-                    padding-bottom: 20px;
-                    margin-bottom: 30px;
-                }
-                .header h1 {
-                    color: #4A5D23;
-                    margin: 0;
-                    font-size: 32px;
-                }
-                .header p {
-                    color: #666;
-                    margin: 5px 0;
-                }
-                .section {
-                    margin-bottom: 25px;
-                    padding: 15px;
-                    border-left: 4px solid #4A5D23;
-                    background: #f9fafb;
-                }
-                .section h2 {
-                    color: #4A5D23;
-                    font-size: 18px;
-                    margin-top: 0;
-                    margin-bottom: 10px;
-                }
-                .section p {
-                    margin: 8px 0;
-                    line-height: 1.6;
-                }
-                .highlight {
-                    background: #4A5D23;
-                    color: white;
-                    padding: 15px;
-                    border-radius: 8px;
-                    margin: 20px 0;
-                }
-                .highlight h3 {
-                    margin: 0 0 10px 0;
-                }
-                .nutrient-grid {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 15px;
-                    margin-top: 15px;
-                }
-                .nutrient-box {
-                    padding: 15px;
-                    border: 2px solid #4A5D23;
-                    border-radius: 8px;
-                    text-align: center;
-                }
-                .nutrient-box h4 {
-                    margin: 0 0 5px 0;
-                    color: #666;
-                    font-size: 14px;
-                }
-                .nutrient-box p {
-                    margin: 0;
-                    font-size: 24px;
-                    font-weight: bold;
-                    color: #4A5D23;
-                }
-                ul {
-                    margin: 10px 0;
-                    padding-left: 20px;
-                }
-                li {
-                    margin: 5px 0;
-                }
-                .footer {
-                    margin-top: 40px;
-                    padding-top: 20px;
-                    border-top: 2px solid #ddd;
-                    text-align: center;
-                    color: #666;
-                    font-size: 12px;
-                }
-                @media print {
-                    body {
-                        padding: 20px;
-                    }
-                }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1>🌾 Soil Health Report</h1>
-                <p><strong>Growmore - AgriMind AI</strong></p>
-                <p>Generated: ${date} at ${time}</p>
-                ${appState.location.state ? `<p>Location: ${appState.location.district}, ${appState.location.state}</p>` : ''}
-            </div>
+        <div style="text-align:center;border-bottom:3px solid #4A5D23;padding-bottom:20px;margin-bottom:25px;">
+            <h1 style="color:#4A5D23;margin:0;font-size:28px;">🌾 Growmore Soil Health Report</h1>
+            <p style="color:#666;margin:5px 0;">Generated: ${date} at ${time}</p>
+        </div>
 
-            <div class="section">
-                <h2>📊 Soil Analysis</h2>
-                <p><strong>Soil Type:</strong> ${result.soil_type || 'N/A'}</p>
-            </div>
+        <div style="margin-bottom:20px;padding:15px;border-left:4px solid #4A5D23;background:#f9fafb;">
+            <h2 style="color:#4A5D23;font-size:16px;margin:0 0 8px 0;">📊 Soil Analysis</h2>
+            <p style="margin:5px 0;"><strong>Soil Type:</strong> ${(result.soil_type || 'N/A').replace(/_/g, ' ')}</p>
+            <p style="margin:5px 0;"><strong>Location:</strong> ${result.location || 'N/A'}</p>
+            <p style="margin:5px 0;"><strong>Land Size:</strong> ${landVal} ${unitLabel}</p>
+        </div>
 
-            <div class="section">
-                <h2>🌤️ Weather Conditions</h2>
-                <p><strong>Current Weather:</strong> ${result.weather || 'N/A'}</p>
-                <p><strong>Rainfall Estimate:</strong> ${result.rainfall_est || 'N/A'}</p>
+        <div style="margin-bottom:20px;padding:15px;border-left:4px solid #2563eb;background:#eff6ff;">
+            <h2 style="color:#2563eb;font-size:16px;margin:0 0 8px 0;">🌤️ Weather & Season</h2>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <p style="margin:3px 0;"><strong>Temperature:</strong> ${result.temperature !== 'N/A' ? result.temperature + '°C' : 'N/A'}</p>
+                <p style="margin:3px 0;"><strong>Humidity:</strong> ${result.humidity !== 'N/A' ? result.humidity + '%' : 'N/A'}</p>
+                <p style="margin:3px 0;"><strong>Annual Rainfall:</strong> ${result.annual_rainfall !== 'N/A' ? result.annual_rainfall + ' mm' : 'N/A'}</p>
+                <p style="margin:3px 0;"><strong>Season:</strong> ${result.season || 'N/A'}</p>
             </div>
+        </div>
 
-            <div class="highlight">
-                <h3>🌾 Recommended Crop</h3>
-                <p style="font-size: 24px; margin: 0;"><strong>${result.recommended_crop || 'N/A'}</strong></p>
-            </div>
+        <div style="background:#4A5D23;color:white;padding:18px;border-radius:8px;margin:20px 0;text-align:center;">
+            <h3 style="margin:0 0 8px 0;">🌾 Recommended Crop</h3>
+            <p style="font-size:24px;margin:0;font-weight:bold;">${result.recommended_crop || 'N/A'}</p>
+            <p style="margin:6px 0 0 0;opacity:0.8;">Suitability: ${result.suitability || 0}% | Revenue: ₹${result.revenue?.toLocaleString('en-IN') || '0'}</p>
+        </div>
 
-            <div class="section">
-                <h2>🌱 Top 3 Suitable Crops</h2>
-                <ul>
-                    ${result.top_3_crops ? result.top_3_crops.map(crop => `<li>${crop}</li>`).join('') : '<li>No data available</li>'}
-                </ul>
-            </div>
+        <div style="margin-bottom:20px;">
+            <h2 style="color:#4A5D23;font-size:16px;margin:0 0 10px 0;">📋 Crop Comparison Table</h2>
+            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <thead>
+                    <tr style="background:#4A5D23;color:white;">
+                        <th style="padding:10px;text-align:left;">Crop</th>
+                        <th style="padding:10px;text-align:center;">Suitability %</th>
+                        <th style="padding:10px;text-align:center;">Yield (tons)</th>
+                        <th style="padding:10px;text-align:center;">Revenue (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>${tableRows}</tbody>
+            </table>
+        </div>
 
-            <div class="section">
-                <h2>🧪 Nutrient Profile</h2>
-                <div class="nutrient-grid">
-                    <div class="nutrient-box">
-                        <h4>Nitrogen (N)</h4>
-                        <p>${result.nutrient_profile?.N || 'N/A'}</p>
-                    </div>
-                    <div class="nutrient-box">
-                        <h4>Phosphorus (P)</h4>
-                        <p>${result.nutrient_profile?.P || 'N/A'}</p>
-                    </div>
-                    <div class="nutrient-box">
-                        <h4>Potassium (K)</h4>
-                        <p>${result.nutrient_profile?.K || 'N/A'}</p>
-                    </div>
-                    <div class="nutrient-box">
-                        <h4>pH Level</h4>
-                        <p>${result.nutrient_profile?.ph || 'N/A'}</p>
-                    </div>
+        <div style="margin-top:30px;padding-top:15px;border-top:2px solid #ddd;text-align:center;color:#666;font-size:11px;">
+            <p>© 2025 Growmore - AI Farming Assistant</p>
+            <p>This report is AI-generated and should be verified with local agricultural experts.</p>
+        </div>
+    `;
+}
+
+// ================== RESET / START OVER ==================
+function resetApp() {
+    // Reset state
+    appState = { location: null, locationMethod: null, image: null, imageFile: null, result: null };
+    chatThreadId = null;
+    chatOpen = false;
+    chatFullscreen = false;
+
+    // Hide result sections
+    document.getElementById('optimalCropSection')?.classList.add('hidden');
+    summarySection.classList.add('hidden');
+    tableSection.classList.add('hidden');
+    chartSection.classList.add('hidden');
+    document.getElementById('startOverBtn')?.classList.add('hidden');
+    loadingSpinner.classList.add('hidden');
+
+    // Hide chat FAB & popup
+    document.getElementById('chatFab')?.classList.add('hidden');
+    document.getElementById('chatPopup')?.classList.add('hidden');
+
+    // Reset image
+    imageInput.value = '';
+    imagePreview.classList.add('hidden');
+    imageBtn.classList.remove('opacity-50');
+    imageStatusText.innerHTML = t('uploadTitle');
+    imageFileName.classList.add('hidden');
+
+    // Reset land size
+    landSizeInput.value = '1';
+    currentUnit = 'acres';
+    document.querySelectorAll('.unit-btn').forEach(b => {
+        if (b.dataset.unit === 'acres') {
+            b.classList.add('bg-cow-dung-green', 'text-white');
+            b.classList.remove('bg-white', 'text-gray-600');
+        } else {
+            b.classList.remove('bg-cow-dung-green', 'text-white');
+            b.classList.add('bg-white', 'text-gray-600');
+        }
+    });
+
+    // Reset analyse button
+    const analyseBtnIcon = document.getElementById('analyseBtnIcon');
+    analyseBtnIcon.className = 'fas fa-brain';
+    analyseBtnText.textContent = t('analyseBtn');
+    analyseBtn.classList.remove('bg-green-600');
+    checkAnalyseButtonState();
+
+    // Reset chat messages
+    const chatMessages = document.getElementById('chatMessages');
+    if (chatMessages) {
+        chatMessages.innerHTML = `
+            <div class="flex gap-3 mb-4">
+                <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs flex-shrink-0">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="bg-white p-3 rounded-xl shadow-sm max-w-[85%]">
+                    <p class="text-sm text-gray-700">I've analyzed your farm data. Ask me anything about the recommendations!</p>
                 </div>
             </div>
+        `;
+    }
 
-            <div class="footer">
-                <p>&copy; 2025 AgriMind AI - Growmore Platform</p>
-                <p>This report is generated based on AI analysis and should be verified with local agricultural experts.</p>
-            </div>
-        </body>
-        </html>
-    `;
+    // Re-request location
+    requestLocation();
+
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 console.log("Script loaded successfully!");
