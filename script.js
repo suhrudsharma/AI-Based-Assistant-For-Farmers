@@ -1034,37 +1034,59 @@ async function handleDownloadPDF() {
         return;
     }
 
-    console.log("Generating PDF...");
-
     const originalHTML = downloadBtn.innerHTML;
-    downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+    downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing print...';
     downloadBtn.disabled = true;
 
     try {
-        // Build a hidden container with all analysis content
-        const pdfContainer = document.createElement('div');
-        pdfContainer.style.cssText = 'padding:30px;font-family:Arial,sans-serif;max-width:800px;background:white;';
-        pdfContainer.innerHTML = generatePDFContent();
-
-        document.body.appendChild(pdfContainer);
-
-        const opt = {
-            margin: 0.5,
-            filename: `Growmore_Report_${new Date().toISOString().slice(0, 10)}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-        };
-
-        await html2pdf().set(opt).from(pdfContainer).save();
-
-        document.body.removeChild(pdfContainer);
-
+        // Create print window
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Soil Doctor Report - ${new Date().toLocaleDateString()}</title>
+                <style>
+                    body { 
+                        font-family: Arial, sans-serif; 
+                        padding: 20px; 
+                        max-width: 800px; 
+                        margin: 0 auto;
+                        background: white;
+                    }
+                    table { 
+                        border-collapse: collapse; 
+                        width: 100%; 
+                        margin: 10px 0;
+                    }
+                    td, th { 
+                        border: 1px solid #ddd; 
+                        padding: 10px; 
+                    }
+                    @media print {
+                        body { padding: 10mm; }
+                    }
+                </style>
+            </head>
+            <body>
+                ${generatePDFContent()}
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+        
+        // Wait for content to load
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Trigger print dialog
+        printWindow.print();
+        
         downloadBtn.innerHTML = originalHTML;
         downloadBtn.disabled = false;
+
     } catch (error) {
-        console.error("PDF generation error:", error);
-        alert("❌ PDF generation failed. Please try again.");
+        console.error("Print error:", error);
+        alert("❌ Failed to open print dialog.");
         downloadBtn.innerHTML = originalHTML;
         downloadBtn.disabled = false;
     }
@@ -1268,9 +1290,10 @@ function generatePDFContent() {
     let tableRows = '';
     if (result.full_table && result.full_table.length > 0) {
         result.full_table.forEach((r, i) => {
+            const bgColor = i % 2 === 0 ? '#f9fafb' : '#ffffff';
             tableRows += `
-                <tr style="${i % 2 === 0 ? 'background:#f9fafb;' : ''}">
-                    <td style="padding:10px;border:1px solid #e5e7eb;font-weight:600;">${r.crop}</td>
+                <tr style="background:${bgColor};">
+                    <td style="padding:10px;border:1px solid #e5e7eb;font-weight:600;">${toTitleCase(r.crop)}</td>
                     <td style="padding:10px;border:1px solid #e5e7eb;text-align:center;">${r.suitability}%</td>
                     <td style="padding:10px;border:1px solid #e5e7eb;text-align:center;">${r.yield_ton}</td>
                     <td style="padding:10px;border:1px solid #e5e7eb;text-align:center;">₹${r.revenue?.toLocaleString('en-IN') || '0'}</td>
@@ -1278,53 +1301,98 @@ function generatePDFContent() {
         });
     }
 
+    // Build top 3 crops list
+    let top3List = '';
+    if (result.top_3_crops && result.top_3_crops.length > 0) {
+        result.top_3_crops.forEach((crop, i) => {
+            top3List += `<li style="margin:5px 0;">${i + 1}. ${toTitleCase(crop)}</li>`;
+        });
+    }
+
     return `
-        <div style="text-align:center;border-bottom:3px solid #4A5D23;padding-bottom:20px;margin-bottom:25px;">
-            <h1 style="color:#4A5D23;margin:0;font-size:28px;">🌾 Growmore Soil Health Report</h1>
-            <p style="color:#666;margin:5px 0;">Generated: ${date} at ${time}</p>
-        </div>
-
-        <div style="margin-bottom:20px;padding:15px;border-left:4px solid #4A5D23;background:#f9fafb;">
-            <h2 style="color:#4A5D23;font-size:16px;margin:0 0 8px 0;">📊 Soil Analysis</h2>
-            <p style="margin:5px 0;"><strong>Soil Type:</strong> ${(result.soil_type || 'N/A').replace(/_/g, ' ')}</p>
-            <p style="margin:5px 0;"><strong>Location:</strong> ${result.location || 'N/A'}</p>
-            <p style="margin:5px 0;"><strong>Land Size:</strong> ${landVal} ${unitLabel}</p>
-        </div>
-
-        <div style="margin-bottom:20px;padding:15px;border-left:4px solid #2563eb;background:#eff6ff;">
-            <h2 style="color:#2563eb;font-size:16px;margin:0 0 8px 0;">🌤️ Weather & Season</h2>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                <p style="margin:3px 0;"><strong>Temperature:</strong> ${result.temperature !== 'N/A' ? result.temperature + '°C' : 'N/A'}</p>
-                <p style="margin:3px 0;"><strong>Humidity:</strong> ${result.humidity !== 'N/A' ? result.humidity + '%' : 'N/A'}</p>
-                <p style="margin:3px 0;"><strong>Annual Rainfall:</strong> ${result.annual_rainfall !== 'N/A' ? result.annual_rainfall + ' mm' : 'N/A'}</p>
-                <p style="margin:3px 0;"><strong>Season:</strong> ${result.season || 'N/A'}</p>
+        <div style="max-width:100%;overflow:hidden;">
+            <!-- Header -->
+            <div style="text-align:center;border-bottom:3px solid #4A5D23;padding-bottom:20px;margin-bottom:25px;">
+                <h1 style="color:#4A5D23;margin:0 0 5px 0;font-size:28px;">🌾 Soil Doctor Report</h1>
+                <p style="color:#666;margin:5px 0;font-size:14px;">AI-Powered Crop Recommendation System</p>
+                <p style="color:#888;margin:5px 0;font-size:12px;">Generated: ${date} at ${time}</p>
             </div>
-        </div>
 
-        <div style="background:#4A5D23;color:white;padding:18px;border-radius:8px;margin:20px 0;text-align:center;">
-            <h3 style="margin:0 0 8px 0;">🌾 Recommended Crop</h3>
-            <p style="font-size:24px;margin:0;font-weight:bold;">${result.recommended_crop || 'N/A'}</p>
-            <p style="margin:6px 0 0 0;opacity:0.8;">Suitability: ${result.suitability || 0}% | Revenue: ₹${result.revenue?.toLocaleString('en-IN') || '0'}</p>
-        </div>
+            <!-- Soil Analysis Section -->
+            <div style="margin-bottom:20px;padding:15px;border-left:4px solid #4A5D23;background:#f9fafb;">
+                <h2 style="color:#4A5D23;font-size:18px;margin:0 0 12px 0;">📊 Soil Analysis</h2>
+                <p style="margin:5px 0;font-size:14px;"><strong>Soil Type:</strong> ${(result.soil_type || 'N/A').replace(/_/g, ' ')}</p>
+                <p style="margin:5px 0;font-size:14px;"><strong>Location:</strong> ${result.location || 'N/A'}</p>
+                <p style="margin:5px 0;font-size:14px;"><strong>Land Size:</strong> ${landVal} ${unitLabel}</p>
+            </div>
 
-        <div style="margin-bottom:20px;">
-            <h2 style="color:#4A5D23;font-size:16px;margin:0 0 10px 0;">📋 Crop Comparison Table</h2>
-            <table style="width:100%;border-collapse:collapse;font-size:13px;">
-                <thead>
-                    <tr style="background:#4A5D23;color:white;">
-                        <th style="padding:10px;text-align:left;">Crop</th>
-                        <th style="padding:10px;text-align:center;">Suitability %</th>
-                        <th style="padding:10px;text-align:center;">Yield (tons)</th>
-                        <th style="padding:10px;text-align:center;">Revenue (₹)</th>
+            <!-- Weather & Season Section -->
+            <div style="margin-bottom:20px;padding:15px;border-left:4px solid #2563eb;background:#eff6ff;">
+                <h2 style="color:#2563eb;font-size:18px;margin:0 0 12px 0;">🌤️ Weather & Season Data</h2>
+                <table style="width:100%;border-collapse:collapse;">
+                    <tr>
+                        <td style="padding:8px;width:50%;"><strong>Temperature:</strong> ${result.temperature !== 'N/A' ? result.temperature + '°C' : 'N/A'}</td>
+                        <td style="padding:8px;width:50%;"><strong>Humidity:</strong> ${result.humidity !== 'N/A' ? result.humidity + '%' : 'N/A'}</td>
                     </tr>
-                </thead>
-                <tbody>${tableRows}</tbody>
-            </table>
-        </div>
+                    <tr>
+                        <td style="padding:8px;"><strong>Annual Rainfall:</strong> ${result.annual_rainfall !== 'N/A' ? result.annual_rainfall + ' mm' : 'N/A'}</td>
+                        <td style="padding:8px;"><strong>Season:</strong> ${result.season || 'N/A'}</td>
+                    </tr>
+                </table>
+            </div>
 
-        <div style="margin-top:30px;padding-top:15px;border-top:2px solid #ddd;text-align:center;color:#666;font-size:11px;">
-            <p>© 2025 Growmore - AI Farming Assistant</p>
-            <p>This report is AI-generated and should be verified with local agricultural experts.</p>
+            <!-- Recommended Crop Highlight -->
+            <div style="background:#4A5D23;color:white;padding:20px;border-radius:8px;margin:20px 0;text-align:center;">
+                <h3 style="margin:0 0 10px 0;font-size:16px;">🏆 MOST RECOMMENDED CROP</h3>
+                <p style="font-size:26px;margin:0 0 10px 0;font-weight:bold;">${toTitleCase(result.recommended_crop) || 'N/A'}</p>
+                <div style="display:inline-block;background:rgba(255,255,255,0.2);padding:8px 16px;border-radius:4px;margin:5px;">
+                    <strong>Suitability:</strong> ${result.suitability || 0}%
+                </div>
+                <div style="display:inline-block;background:rgba(255,255,255,0.2);padding:8px 16px;border-radius:4px;margin:5px;">
+                    <strong>Revenue:</strong> ₹${result.revenue?.toLocaleString('en-IN') || '0'}
+                </div>
+            </div>
+
+            <!-- Top 3 Crops -->
+            <div style="margin-bottom:20px;padding:15px;background:#f0fdf4;border-left:4px solid #10b981;">
+                <h2 style="color:#059669;font-size:16px;margin:0 0 10px 0;">🌱 Top 3 Recommended Crops</h2>
+                <ol style="margin:5px 0;padding-left:20px;font-size:14px;">
+                    ${top3List}
+                </ol>
+            </div>
+
+            <!-- Full Crop Comparison Table -->
+            <div style="margin-bottom:20px;page-break-inside:avoid;">
+                <h2 style="color:#4A5D23;font-size:18px;margin:0 0 12px 0;">📋 Complete Crop Comparison</h2>
+                <table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid #e5e7eb;">
+                    <thead>
+                        <tr style="background:#4A5D23;color:white;">
+                            <th style="padding:12px;text-align:left;border:1px solid #4A5D23;">Crop</th>
+                            <th style="padding:12px;text-align:center;border:1px solid #4A5D23;">Suitability %</th>
+                            <th style="padding:12px;text-align:center;border:1px solid #4A5D23;">Yield (tons)</th>
+                            <th style="padding:12px;text-align:center;border:1px solid #4A5D23;">Revenue (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tableRows}</tbody>
+                </table>
+            </div>
+
+            <!-- Graph Explanation -->
+            <div style="margin-bottom:20px;padding:15px;background:#fef3c7;border-left:4px solid #f59e0b;">
+                <h2 style="color:#d97706;font-size:16px;margin:0 0 10px 0;">📈 Risk vs Reward Analysis</h2>
+                <p style="margin:5px 0;font-size:13px;">The scatter chart in the web interface shows each crop plotted by:</p>
+                <ul style="margin:10px 0;padding-left:20px;font-size:13px;">
+                    <li><strong>X-Axis:</strong> Suitability Score (%) - How well the crop matches your soil and climate</li>
+                    <li><strong>Y-Axis:</strong> Projected Revenue (₹) - Estimated earnings from the crop</li>
+                    <li><strong>Optimal Choice:</strong> Crops in the top-right corner offer the best balance of suitability and profit</li>
+                </ul>
+            </div>
+
+            <!-- Footer -->
+            <div style="margin-top:30px;padding-top:15px;border-top:2px solid #ddd;text-align:center;">
+                <p style="color:#666;font-size:12px;margin:5px 0;">© 2025 DEVSOC'26 - Soil Doctor AI System</p>
+                <p style="color:#999;font-size:11px;margin:5px 0;"><em>This report is AI-generated. Please verify recommendations with local agricultural experts.</em></p>
+            </div>
         </div>
     `;
 }
